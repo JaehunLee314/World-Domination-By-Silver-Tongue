@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -13,6 +14,7 @@ namespace SilverTongue.BattleScene
         [SerializeField] private TextMeshProUGUI turnTrackerText;
         [SerializeField] private Button pauseButton;
         [SerializeField] private TextMeshProUGUI pauseButtonText;
+        [SerializeField] private Button logButton;
 
         [Header("Character Display")]
         [SerializeField] private Image playerCharacterImage;
@@ -50,9 +52,15 @@ namespace SilverTongue.BattleScene
             SetupButtons();
             UpdateTurnTracker();
 
-            // Start with opponent speaking first
             SetSpeaker(false);
             StartBattle();
+        }
+
+        public void Resume()
+        {
+            _isPaused = false;
+            _isBattleActive = true;
+            UpdateTurnTracker();
         }
 
         private void SetupDisplay()
@@ -76,10 +84,16 @@ namespace SilverTongue.BattleScene
         private void SetupButtons()
         {
             pauseButton.onClick.RemoveAllListeners();
-            pauseButton.onClick.AddListener(TogglePause);
+            pauseButton.onClick.AddListener(OnPause);
 
             sendActionButton.onClick.RemoveAllListeners();
             sendActionButton.onClick.AddListener(OnSendAction);
+
+            if (logButton != null)
+            {
+                logButton.onClick.RemoveAllListeners();
+                logButton.onClick.AddListener(() => _manager.ShowConversationHistory());
+            }
         }
 
         private void UpdateTurnTracker()
@@ -101,6 +115,22 @@ namespace SilverTongue.BattleScene
             speakerNameText.text = speaker;
             dialogueText.text = text;
             AddToLog($"[{speaker}]: {text}");
+
+            _manager.AddConversationEntry(new ConversationEntry
+            {
+                SpeakerName = speaker,
+                SpeechText = text,
+                Timestamp = $"Turn {_manager.CurrentTurn}",
+                IsPlayer = speaker == _manager.SelectedBattler.characterName,
+                EvidenceUsed = ParseTag(text, "evidence_used"),
+                SkillUsed = ParseTag(text, "skill_used")
+            });
+        }
+
+        private string ParseTag(string text, string tagName)
+        {
+            var match = Regex.Match(text, $"<{tagName}=([^>]+)>");
+            return match.Success ? match.Groups[1].Value : null;
         }
 
         private void AddToLog(string entry)
@@ -108,21 +138,18 @@ namespace SilverTongue.BattleScene
             _battleLog.Add(entry);
             logText.text = string.Join("\n", _battleLog);
 
-            // Auto-scroll to bottom
             Canvas.ForceUpdateCanvases();
             logScrollRect.verticalNormalizedPosition = 0f;
         }
 
-        private void TogglePause()
+        private void OnPause()
         {
-            _isPaused = !_isPaused;
-            pauseButtonText.text = _isPaused ? "Resume" : "Pause";
-            Debug.Log($"[BattleView] Battle {(_isPaused ? "paused" : "resumed")}");
+            _isPaused = true;
+            _manager.PauseToStrategy();
         }
 
         private async void StartBattle()
         {
-            // Initial opponent dialogue via LLM
             var request = new LLMRequest
             {
                 SystemPrompt = _manager.Opponent.systemPromptLore,
@@ -147,11 +174,9 @@ namespace SilverTongue.BattleScene
 
             actionInputField.text = "";
 
-            // Show player action
             SetSpeaker(true);
             ShowDialogue(_manager.SelectedBattler.characterName, playerAction);
 
-            // Get opponent response
             SetSpeaker(false);
             var request = new LLMRequest
             {

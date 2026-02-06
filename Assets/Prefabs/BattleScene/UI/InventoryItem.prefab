@@ -225,6 +225,8 @@ GameObject:
   - component: {fileID: 3234901102878017063}
   - component: {fileID: 3337905501749976658}
   - component: {fileID: 2748548808652240417}
+  - component: {fileID: 2006832615769832507}
+  - component: {fileID: 4123342368978672491}
   - component: {fileID: 3642387202314310356}
   m_Layer: 5
   m_Name: InventoryItem
@@ -338,6 +340,30 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!225 &2006832615769832507
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4837304485827841876}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &4123342368978672491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4837304485827841876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91a49ab9576574e848ed424d609f6a14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.BattleScene.DraggableItem
 --- !u!114 &3642387202314310356
 MonoBehaviour:
   m_ObjectHideFlags: 0

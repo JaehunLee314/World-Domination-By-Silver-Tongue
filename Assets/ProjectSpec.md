@@ -78,7 +78,21 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Visual Effect:** The surrounding area of the popup must be blurred.  
 **Functionality:** Supports item filtering in the controller code. Close buttons for the main inventory are at the bottom.
 
-### 3.4 BattlerSelectingCanvas (within BattleScene)
+### 3.4 ConversationHistoryCanvas Prefab
+
+**Structure:** A scrollable overlay displaying conversation history.
+**History Entries:** Each entry shows:
+
+- Speaker name (left-aligned for player, right-aligned for opponent).
+- Speech text with timestamp.
+- Optional indicators for evidence/skills used.
+
+**Visual Layout:** Chat-bubble style with alternating alignment based on speaker.  
+**Close Button:** Located at the bottom middle.  
+**Visual Effect:** The surrounding area of the popup must be blurred.  
+**Functionality:** Displays the full turn-by-turn dialogue from the current battle session.
+
+### 3.5 BattlerSelectingCanvas (within BattleScene)
 
 **UI Layout:** A horizontally scrollable table for choosing participants.  
 **Columns per Character:**
@@ -89,9 +103,9 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Interaction:** A selection button associated with each character entry at the bottom.  
 **Verification:** Choosing a character triggers a confirmation popup.
 
-### 3.5 StrategySelectingCanvas (within BattleScene)
+### 3.6 StrategySelectingCanvas (within BattleScene)
 
-**Top Bar:** A button to return to character selection (top right) and a turn counter (e.g., Turn 3/7) at top middle.  
+**Top Bar:** A button to return to character selection (top right), a turn counter (e.g., Turn 3/7) at top middle, and a log button (top left) to open the conversation history.  
 **Middle Section:** Displays the user's selected character (left) and opponent (right). Clicking a character toggles their must-lose conditions.  
 **Bottom Section (Split):**
 
@@ -100,9 +114,9 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 
 **Interaction:** Placeholders support **Drag & Drop** from the inventory.
 
-### 3.6 BattleCanvas (within BattleScene)
+### 3.7 BattleCanvas (within BattleScene)
 
-**Top UI:** Turn tracker (top middle) and a pause button below it.  
+**Top UI:** Turn tracker (top middle), a pause button below it, and a log button (top left) to open the conversation history.  
 *Note:* Pausing must nullify any ongoing LLM calls.  
 **Stage Area:** User character (left) and opponent (right).  
 **Animation:** Characters move to the middle when speaking and return after finishing.  
@@ -110,7 +124,7 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Dialogue Area:** Bottom 1/3 of the screen displaying speaker name and speech text.  
 **Action:** A text field is provided for specific player-driven actions.
 
-### 3.7 BattleResultCanvas & Ending
+### 3.8 BattleResultCanvas & Ending
 
 **BattleResultCanvas (within BattleScene):** Displays win/lose text at the top and a close button at the bottom to transition to the next info-gathering phase.  
 **Ending Scene:** Features final messages, a prominent "Thank You" text, and a close button to exit the game.

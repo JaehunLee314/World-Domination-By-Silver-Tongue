@@ -10,6 +10,7 @@ namespace SilverTongue.BattleScene
         [Header("Top Bar")]
         [SerializeField] private Button backToSelectionButton;
         [SerializeField] private TextMeshProUGUI turnCounterText;
+        [SerializeField] private Button logButton;
 
         [Header("Character Display")]
         [SerializeField] private Image playerImage;
@@ -86,6 +87,17 @@ namespace SilverTongue.BattleScene
             filterSkillButton.onClick.AddListener(() => FilterInventory(ItemType.SkillBook));
             filterItemButton.onClick.RemoveAllListeners();
             filterItemButton.onClick.AddListener(() => FilterInventory(ItemType.Evidence));
+
+            if (logButton != null)
+            {
+                logButton.onClick.RemoveAllListeners();
+                logButton.onClick.AddListener(() => _manager.ShowConversationHistory());
+            }
+
+            // Update confirm button label based on pause state
+            var confirmLabel = confirmStrategyButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (confirmLabel != null)
+                confirmLabel.text = _manager.IsPausedFromBattle ? "RESUME BATTLE" : "CONFIRM STRATEGY";
         }
 
         public void OnPlayerCharacterClicked()
@@ -148,7 +160,10 @@ namespace SilverTongue.BattleScene
 
         private void OnConfirmStrategy()
         {
-            _manager.OnStrategyConfirmed();
+            if (_manager.IsPausedFromBattle)
+                _manager.ResumeFromStrategy();
+            else
+                _manager.OnStrategyConfirmed();
         }
     }
 }

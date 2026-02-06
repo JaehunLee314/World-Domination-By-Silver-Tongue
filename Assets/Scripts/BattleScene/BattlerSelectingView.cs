@@ -27,6 +27,12 @@ namespace SilverTongue.BattleScene
         {
             _manager = manager;
             confirmationPopup.SetActive(false);
+
+            confirmYesButton.onClick.RemoveAllListeners();
+            confirmYesButton.onClick.AddListener(OnConfirmYes);
+            confirmNoButton.onClick.RemoveAllListeners();
+            confirmNoButton.onClick.AddListener(OnConfirmNo);
+
             PopulateCharacters();
         }
 

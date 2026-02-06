@@ -21,6 +21,10 @@ namespace SilverTongue.BattleScene
             itemNameText.text = item.itemName;
             if (item.itemImage != null)
                 itemImage.sprite = item.itemImage;
+
+            var draggable = GetComponent<DraggableItem>();
+            if (draggable != null)
+                draggable.InventoryItemUI = this;
         }
     }
 }

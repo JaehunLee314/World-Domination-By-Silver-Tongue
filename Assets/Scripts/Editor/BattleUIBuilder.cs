@@ -20,6 +20,8 @@ public class BattleUIBuilder
         BuildStrategySelectingCanvas();
         BuildBattleCanvas();
         BuildBattleResultCanvas();
+        BuildChatBubblePrefab();
+        BuildConversationHistoryCanvas();
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("[BattleUIBuilder] All prefabs built successfully!");
@@ -229,6 +231,8 @@ public class BattleUIBuilder
         nameObj.GetComponent<RectTransform>().sizeDelta = new Vector2(90, 30);
         AddTMP(nameObj, "Item", 14, TextAlignmentOptions.Center);
 
+        root.AddComponent<CanvasGroup>();
+        root.AddComponent<SilverTongue.BattleScene.DraggableItem>();
         root.AddComponent<SilverTongue.BattleScene.InventoryItemUI>();
 
         string path = "Assets/Prefabs/BattleScene/UI/InventoryItem.prefab";
@@ -379,6 +383,14 @@ public class BattleUIBuilder
         backRt.anchoredPosition = new Vector2(-15, 0);
         backRt.sizeDelta = new Vector2(100, 40);
 
+        // Log button (left)
+        var logBtn = CreateButton("LogButton", topBar.transform, "LOG", new Vector2(80, 40),
+            new Color(0.3f, 0.3f, 0.5f));
+        var logBtnRt = logBtn.GetComponent<RectTransform>();
+        SetAnchors(logBtnRt, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(0, 0.5f));
+        logBtnRt.anchoredPosition = new Vector2(15, 0);
+        logBtnRt.sizeDelta = new Vector2(80, 40);
+
         // === MIDDLE SECTION (40%) ===
         var midSection = CreateUIObject("MiddleSection", canvas);
         var midRt = midSection.GetComponent<RectTransform>();
@@ -528,6 +540,8 @@ public class BattleUIBuilder
             skillLblObj.GetComponent<RectTransform>().sizeDelta = new Vector2(60, 20);
             AddTMP(skillLblObj, "Skill", 12);
 
+            skillSlot.AddComponent<SilverTongue.BattleScene.DropTarget>();
+
             // Item slot
             var itemSlot = CreateUIObject("ItemSlot", slotObj.transform);
             itemSlot.GetComponent<RectTransform>().sizeDelta = new Vector2(70, 80);
@@ -545,6 +559,8 @@ public class BattleUIBuilder
             var itemLblObj = CreateUIObject("ItemSlotLabel", itemSlot.transform);
             itemLblObj.GetComponent<RectTransform>().sizeDelta = new Vector2(60, 20);
             AddTMP(itemLblObj, "Item", 12);
+
+            itemSlot.AddComponent<SilverTongue.BattleScene.DropTarget>();
 
             slotObj.AddComponent<SilverTongue.BattleScene.AgendaSlotUI>();
         }
@@ -650,6 +666,14 @@ public class BattleUIBuilder
         SetAnchors(pauseRt, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 1));
         pauseRt.anchoredPosition = new Vector2(0, 5);
         pauseRt.sizeDelta = new Vector2(100, 35);
+
+        // Log button (right)
+        var logBtnB = CreateButton("LogButton", topUI.transform, "LOG", new Vector2(80, 35),
+            new Color(0.3f, 0.3f, 0.5f));
+        var logBtnBRt = logBtnB.GetComponent<RectTransform>();
+        SetAnchors(logBtnBRt, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(1, 0.5f));
+        logBtnBRt.anchoredPosition = new Vector2(-15, 0);
+        logBtnBRt.sizeDelta = new Vector2(80, 35);
 
         // === STAGE AREA (middle 55%) ===
         var stageArea = CreateUIObject("StageArea", canvas);
@@ -827,5 +851,143 @@ public class BattleUIBuilder
         PrefabUtility.SaveAsPrefabAsset(instance, prefabPath);
         Object.DestroyImmediate(instance);
         Debug.Log($"[BattleUIBuilder] Updated: {prefabPath}");
+    }
+
+    // ─── ChatBubble Prefab ────────────────────────────────────────────────
+    static void BuildChatBubblePrefab()
+    {
+        var root = CreateUIObject("ChatBubble", null);
+        var rootRt = root.GetComponent<RectTransform>();
+        rootRt.sizeDelta = new Vector2(0, 120);
+
+        var hlg = root.AddComponent<HorizontalLayoutGroup>();
+        hlg.childAlignment = TextAnchor.UpperLeft;
+        hlg.childControlWidth = false;
+        hlg.childControlHeight = false;
+        hlg.childForceExpandWidth = false;
+        hlg.childForceExpandHeight = false;
+        hlg.padding = new RectOffset(10, 10, 5, 5);
+
+        var le = root.AddComponent<LayoutElement>();
+        le.preferredHeight = 120;
+        le.flexibleWidth = 1;
+
+        // Bubble background
+        var bubble = CreateUIObject("BubbleBackground", root.transform);
+        var bubbleRt = bubble.GetComponent<RectTransform>();
+        bubbleRt.sizeDelta = new Vector2(600, 110);
+        var bubbleBg = bubble.AddComponent<Image>();
+        bubbleBg.color = new Color(0.2f, 0.4f, 0.6f, 0.9f);
+
+        var bubbleVlg = bubble.AddComponent<VerticalLayoutGroup>();
+        bubbleVlg.padding = new RectOffset(10, 10, 5, 5);
+        bubbleVlg.spacing = 3;
+        bubbleVlg.childControlWidth = true;
+        bubbleVlg.childControlHeight = false;
+        bubbleVlg.childForceExpandWidth = true;
+
+        var speakerObj = CreateUIObject("SpeakerNameText", bubble.transform);
+        speakerObj.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 22);
+        AddTMP(speakerObj, "Speaker", 16, TextAlignmentOptions.Left, Color.yellow);
+
+        var speechObj = CreateUIObject("SpeechText", bubble.transform);
+        speechObj.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 50);
+        AddTMP(speechObj, "", 14, TextAlignmentOptions.TopLeft);
+
+        var tsObj = CreateUIObject("TimestampText", bubble.transform);
+        tsObj.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 18);
+        AddTMP(tsObj, "Turn 1", 11, TextAlignmentOptions.Right, new Color(0.6f, 0.6f, 0.6f));
+
+        var indicatorContainer = CreateUIObject("IndicatorContainer", bubble.transform);
+        indicatorContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 18);
+        indicatorContainer.SetActive(false);
+
+        var indicatorText = CreateUIObject("IndicatorText", indicatorContainer.transform);
+        StretchFill(indicatorText.GetComponent<RectTransform>());
+        AddTMP(indicatorText, "", 11, TextAlignmentOptions.Left, new Color(0.4f, 0.8f, 0.4f));
+
+        root.AddComponent<SilverTongue.BattleScene.ChatBubbleUI>();
+
+        string path = "Assets/Prefabs/BattleScene/UI/ChatBubble.prefab";
+        PrefabUtility.SaveAsPrefabAsset(root, path);
+        Object.DestroyImmediate(root);
+        Debug.Log($"[BattleUIBuilder] Created: {path}");
+    }
+
+    // ─── ConversationHistoryCanvas ────────────────────────────────────────
+    static void BuildConversationHistoryCanvas()
+    {
+        var root = new GameObject("ConversationHistoryCanvas");
+
+        // Canvas child (matches pattern of other canvas prefabs)
+        var canvasObj = new GameObject("Canvas");
+        canvasObj.transform.SetParent(root.transform, false);
+        canvasObj.layer = 5;
+        var canvas = canvasObj.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 10;
+        var scaler = canvasObj.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        canvasObj.AddComponent<GraphicRaycaster>();
+
+        // Dark overlay background
+        var overlay = CreateUIObject("DarkOverlay", canvasObj.transform);
+        StretchFill(overlay.GetComponent<RectTransform>());
+        overlay.AddComponent<Image>().color = new Color(0, 0, 0, 0.8f);
+
+        // Content panel
+        var panel = CreateUIObject("ContentPanel", canvasObj.transform);
+        var panelRt = panel.GetComponent<RectTransform>();
+        panelRt.anchorMin = new Vector2(0.1f, 0.05f);
+        panelRt.anchorMax = new Vector2(0.9f, 0.95f);
+        panelRt.offsetMin = Vector2.zero;
+        panelRt.offsetMax = Vector2.zero;
+        panel.AddComponent<Image>().color = new Color(0.12f, 0.12f, 0.18f, 0.98f);
+
+        var panelVlg = panel.AddComponent<VerticalLayoutGroup>();
+        panelVlg.padding = new RectOffset(10, 10, 10, 10);
+        panelVlg.spacing = 10;
+        panelVlg.childControlWidth = true;
+        panelVlg.childControlHeight = false;
+        panelVlg.childForceExpandWidth = true;
+
+        // Header row
+        var header = CreateUIObject("Header", panel.transform);
+        header.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 50);
+        var headerHlg = header.AddComponent<HorizontalLayoutGroup>();
+        headerHlg.childAlignment = TextAnchor.MiddleCenter;
+        headerHlg.childControlWidth = false;
+        headerHlg.childControlHeight = true;
+        headerHlg.childForceExpandWidth = false;
+
+        var titleObj = CreateUIObject("TitleText", header.transform);
+        titleObj.GetComponent<RectTransform>().sizeDelta = new Vector2(500, 50);
+        AddTMP(titleObj, "Conversation History", 30, TextAlignmentOptions.Center, Color.yellow);
+
+        CreateButton("CloseButton", header.transform, "X", new Vector2(50, 40),
+            new Color(0.7f, 0.2f, 0.2f));
+
+        // Chat ScrollView
+        var (scrollRect, contentRt) = CreateScrollView("ChatScrollView", panel.transform, false, true);
+        scrollRect.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 600);
+        scrollRect.GetComponent<Image>().color = new Color(0.08f, 0.08f, 0.12f, 0.5f);
+
+        var contentVlg = contentRt.gameObject.AddComponent<VerticalLayoutGroup>();
+        contentVlg.spacing = 10;
+        contentVlg.padding = new RectOffset(10, 10, 10, 10);
+        contentVlg.childControlWidth = true;
+        contentVlg.childControlHeight = false;
+        contentVlg.childForceExpandWidth = true;
+        contentVlg.childForceExpandHeight = false;
+        var contentCsf = contentRt.gameObject.AddComponent<ContentSizeFitter>();
+        contentCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        root.AddComponent<SilverTongue.BattleScene.ConversationHistoryView>();
+
+        string path = "Assets/Prefabs/BattleScene/ConversationHistoryCanvas.prefab";
+        PrefabUtility.SaveAsPrefabAsset(root, path);
+        Object.DestroyImmediate(root);
+        Debug.Log($"[BattleUIBuilder] Created: {path}");
     }
 }

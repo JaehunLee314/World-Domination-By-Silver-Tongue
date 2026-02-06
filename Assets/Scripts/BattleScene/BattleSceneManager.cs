@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using SilverTongue.Data;
 using SilverTongue.LLM;
@@ -20,6 +21,10 @@ namespace SilverTongue.BattleScene
         [SerializeField] private GameObject battleCanvas;
         [SerializeField] private GameObject battleResultCanvas;
 
+        [Header("Overlay References")]
+        [SerializeField] private GameObject conversationHistoryCanvas;
+        [SerializeField] private ConversationHistoryView conversationHistoryView;
+
         [Header("View References")]
         [SerializeField] private BattlerSelectingView battlerSelectingView;
         [SerializeField] private StrategySelectingView strategySelectingView;
@@ -34,16 +39,22 @@ namespace SilverTongue.BattleScene
         private BattlePhase _currentPhase;
         private ILLMService _llmService;
         private int _currentTurn;
+        private bool _isPausedFromBattle;
+        private readonly List<ConversationEntry> _conversationHistory = new List<ConversationEntry>();
 
         public CharacterSO SelectedBattler { get; private set; }
         public CharacterSO Opponent => opponent;
         public int CurrentTurn => _currentTurn;
         public int MaxTurns => maxTurns;
         public ILLMService LLMService => _llmService;
+        public bool IsPausedFromBattle => _isPausedFromBattle;
+        public IReadOnlyList<ConversationEntry> ConversationHistory => _conversationHistory;
 
         private void Start()
         {
             InitializeLLMService();
+            if (conversationHistoryCanvas != null)
+                conversationHistoryCanvas.SetActive(false);
             SwitchPhase(BattlePhase.BattlerSelecting);
         }
 
@@ -112,6 +123,44 @@ namespace SilverTongue.BattleScene
         public void ReturnToBattlerSelection()
         {
             SwitchPhase(BattlePhase.BattlerSelecting);
+        }
+
+        // ─── Conversation History ────────────────────────────────────────
+
+        public void AddConversationEntry(ConversationEntry entry)
+        {
+            _conversationHistory.Add(entry);
+        }
+
+        public void ShowConversationHistory()
+        {
+            if (conversationHistoryCanvas == null) return;
+            conversationHistoryCanvas.SetActive(true);
+            conversationHistoryView.Initialize(this);
+        }
+
+        public void HideConversationHistory()
+        {
+            if (conversationHistoryCanvas == null) return;
+            conversationHistoryCanvas.SetActive(false);
+        }
+
+        // ─── Pause / Resume (Battle <-> Strategy) ───────────────────────
+
+        public void PauseToStrategy()
+        {
+            _isPausedFromBattle = true;
+            battleCanvas.SetActive(false);
+            strategySelectingCanvas.SetActive(true);
+            strategySelectingView.Initialize(this);
+        }
+
+        public void ResumeFromStrategy()
+        {
+            _isPausedFromBattle = false;
+            strategySelectingCanvas.SetActive(false);
+            battleCanvas.SetActive(true);
+            battleView.Resume();
         }
     }
 }

@@ -39,6 +39,24 @@ public class AgendaSlotWirer
             so.FindProperty("itemSlotLabel").objectReferenceValue = slotTransform.Find("ItemSlot/ItemSlotLabel")?.GetComponent<TextMeshProUGUI>();
 
             so.ApplyModifiedProperties();
+
+            // Wire DropTarget slotType on skill and item slots
+            var skillSlotDt = slotTransform.Find("SkillSlot")?.GetComponent<DropTarget>();
+            if (skillSlotDt != null)
+            {
+                var dtSo = new SerializedObject(skillSlotDt);
+                dtSo.FindProperty("slotType").enumValueIndex = 0; // DropSlotType.Skill
+                dtSo.ApplyModifiedProperties();
+            }
+
+            var itemSlotDt = slotTransform.Find("ItemSlot")?.GetComponent<DropTarget>();
+            if (itemSlotDt != null)
+            {
+                var dtSo = new SerializedObject(itemSlotDt);
+                dtSo.FindProperty("slotType").enumValueIndex = 1; // DropSlotType.Item
+                dtSo.ApplyModifiedProperties();
+            }
+
             Debug.Log($"[AgendaSlotWirer] Wired AgendaSlot{i}");
         }
 
@@ -75,6 +93,27 @@ public class AgendaSlotWirer
                 invSo.FindProperty("itemNameText").objectReferenceValue = invPrefab.transform.Find("ItemNameText")?.GetComponent<TextMeshProUGUI>();
                 invSo.ApplyModifiedProperties();
                 Debug.Log("[AgendaSlotWirer] Wired InventoryItem prefab");
+            }
+        }
+
+        // Wire ChatBubble prefab
+        string chatBubblePath = "Assets/Prefabs/BattleScene/UI/ChatBubble.prefab";
+        var chatBubblePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(chatBubblePath);
+        if (chatBubblePrefab != null)
+        {
+            var bubbleUI = chatBubblePrefab.GetComponent<ChatBubbleUI>();
+            if (bubbleUI != null)
+            {
+                var bubbleSo = new SerializedObject(bubbleUI);
+                bubbleSo.FindProperty("speakerNameText").objectReferenceValue = chatBubblePrefab.transform.Find("BubbleBackground/SpeakerNameText")?.GetComponent<TextMeshProUGUI>();
+                bubbleSo.FindProperty("speechText").objectReferenceValue = chatBubblePrefab.transform.Find("BubbleBackground/SpeechText")?.GetComponent<TextMeshProUGUI>();
+                bubbleSo.FindProperty("timestampText").objectReferenceValue = chatBubblePrefab.transform.Find("BubbleBackground/TimestampText")?.GetComponent<TextMeshProUGUI>();
+                bubbleSo.FindProperty("indicatorContainer").objectReferenceValue = chatBubblePrefab.transform.Find("BubbleBackground/IndicatorContainer")?.gameObject;
+                bubbleSo.FindProperty("indicatorText").objectReferenceValue = chatBubblePrefab.transform.Find("BubbleBackground/IndicatorContainer/IndicatorText")?.GetComponent<TextMeshProUGUI>();
+                bubbleSo.FindProperty("rootLayout").objectReferenceValue = chatBubblePrefab.GetComponent<HorizontalLayoutGroup>();
+                bubbleSo.FindProperty("bubbleBackground").objectReferenceValue = chatBubblePrefab.transform.Find("BubbleBackground")?.GetComponent<Image>();
+                bubbleSo.ApplyModifiedProperties();
+                Debug.Log("[AgendaSlotWirer] Wired ChatBubble prefab");
             }
         }
 

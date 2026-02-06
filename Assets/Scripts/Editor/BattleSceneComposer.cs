@@ -62,12 +62,18 @@ public class BattleSceneComposer
         DestroyIfExists("StrategySelectingCanvas");
         DestroyIfExists("BattleCanvas");
         DestroyIfExists("BattleResultCanvas");
+        DestroyIfExists("ConversationHistoryCanvas");
         DestroyIfExists("BattleSceneManager");
+
+        var conversationHistoryPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/BattleScene/ConversationHistoryCanvas.prefab");
 
         var battlerSelectingObj = (GameObject)PrefabUtility.InstantiatePrefab(battlerSelectingPrefab);
         var strategySelectingObj = (GameObject)PrefabUtility.InstantiatePrefab(strategySelectingPrefab);
         var battleObj = (GameObject)PrefabUtility.InstantiatePrefab(battlePrefab);
         var battleResultObj = (GameObject)PrefabUtility.InstantiatePrefab(battleResultPrefab);
+        var conversationHistoryObj = conversationHistoryPrefab != null
+            ? (GameObject)PrefabUtility.InstantiatePrefab(conversationHistoryPrefab)
+            : null;
 
         // Remove duplicate EventSystems (keep only one)
         // The first canvas has EventSystem, remove from others
@@ -96,6 +102,13 @@ public class BattleSceneComposer
         bsmSo.FindProperty("battleView").objectReferenceValue = battleObj.GetComponent<BattleView>();
         bsmSo.FindProperty("battleResultView").objectReferenceValue = battleResultObj.GetComponent<BattleResultView>();
 
+        // Conversation History overlay
+        if (conversationHistoryObj != null)
+        {
+            bsmSo.FindProperty("conversationHistoryCanvas").objectReferenceValue = conversationHistoryObj;
+            bsmSo.FindProperty("conversationHistoryView").objectReferenceValue = conversationHistoryObj.GetComponent<ConversationHistoryView>();
+        }
+
         // Set opponent (default to Demon King)
         bsmSo.FindProperty("opponent").objectReferenceValue = zarvoth;
         bsmSo.FindProperty("maxTurns").intValue = 7;
@@ -108,6 +121,8 @@ public class BattleSceneComposer
         WireStrategySelectingView(strategySelectingObj);
         WireBattleView(battleObj);
         WireBattleResultView(battleResultObj);
+        if (conversationHistoryObj != null)
+            WireConversationHistoryView(conversationHistoryObj);
 
         // === 5. Save Scene ===
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(activeScene);
@@ -214,6 +229,9 @@ public class BattleSceneComposer
 
         so.FindProperty("confirmStrategyButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/ConfirmStrategyButton");
 
+        // Log button
+        so.FindProperty("logButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/TopBar/LogButton");
+
         so.ApplyModifiedProperties();
         Debug.Log("[BattleSceneComposer] Wired StrategySelectingView");
     }
@@ -229,6 +247,7 @@ public class BattleSceneComposer
         so.FindProperty("turnTrackerText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/TopUI/TurnTrackerText");
         so.FindProperty("pauseButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/TopUI/PauseButton");
         so.FindProperty("pauseButtonText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/TopUI/PauseButton/Text");
+        so.FindProperty("logButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/TopUI/LogButton");
 
         // Characters
         so.FindProperty("playerCharacterImage").objectReferenceValue = FindInChildren<Image>(root, "Canvas/StageArea/PlayerCharacterPanel/PlayerCharacterImage");
@@ -263,5 +282,26 @@ public class BattleSceneComposer
 
         so.ApplyModifiedProperties();
         Debug.Log("[BattleSceneComposer] Wired BattleResultView");
+    }
+
+    // ─── Wire ConversationHistoryView ────────────────────────────────────
+    static void WireConversationHistoryView(GameObject root)
+    {
+        var view = root.GetComponent<ConversationHistoryView>();
+        if (view == null) return;
+        var so = new SerializedObject(view);
+
+        so.FindProperty("scrollRect").objectReferenceValue = FindInChildren<ScrollRect>(root, "Canvas/ContentPanel/ChatScrollView");
+
+        var content = FindChild(root, "Canvas/ContentPanel/ChatScrollView/Viewport/Content");
+        so.FindProperty("contentContainer").objectReferenceValue = content != null ? content.transform : null;
+
+        so.FindProperty("closeButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/ContentPanel/Header/CloseButton");
+
+        var chatBubblePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/BattleScene/UI/ChatBubble.prefab");
+        so.FindProperty("chatBubblePrefab").objectReferenceValue = chatBubblePrefab;
+
+        so.ApplyModifiedProperties();
+        Debug.Log("[BattleSceneComposer] Wired ConversationHistoryView");
     }
 }
