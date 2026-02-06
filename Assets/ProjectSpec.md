@@ -21,11 +21,12 @@ The game operates on a structured ssequence of exploration, preparation, and ver
 
 1. **Start Scene:** The initial entry point.
 2. **Info Gathering Scene:** Exploration and evidence collection via movement and interaction.
-3. **Battler Selecting Scene:** Choosing the active negotiator based on character profiles.
-4. **Strategy Selecting Scene:** Mapping out the debate agenda, with an option to loop back to Battler Selection.
-5. **Battle Scene:** 1v1 AI-driven auto-battle utilizing gathered evidence and skills.
-6. **Battle Result Scene:** Outcome evaluation and reward processing.
-7. **Loop/Ending:** Return to gathering or proceed to the final conclusion.
+3. **Battle Scene:** A unified scene containing multiple canvas-based UI phases:
+   - **BattlerSelectingCanvas:** Choosing the active negotiator based on character profiles.
+   - **StrategySelectingCanvas:** Mapping out the debate agenda, with an option to loop back to Battler Selection.
+   - **BattleCanvas:** 1v1 AI-driven auto-battle utilizing gathered evidence and skills.
+   - **BattleResultCanvas:** Outcome evaluation and reward processing.
+4. **Loop/Ending:** Return to gathering or proceed to the final conclusion.
 
 ## Part 2. Folder Structure
 
@@ -41,6 +42,7 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Prefabs:**
 
 - Scene-specific: `Prefabs/<scene-name>/<prefab-name>`
+- Canvas prefabs for BattleScene: `Prefabs/BattleScene/<canvas-name>Canvas` (e.g., `BattlerSelectingCanvas`, `StrategySelectingCanvas`, `BattleCanvas`, `BattleResultCanvas`)
 - General functions: `Prefabs/<general-function-name>/<prefab-name>`
 
 **Resources/Assets:** Apply similar logic for `Materials/`, `Textures/`, and `Audio/`.
@@ -76,7 +78,7 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Visual Effect:** The surrounding area of the popup must be blurred.  
 **Functionality:** Supports item filtering in the controller code. Close buttons for the main inventory are at the bottom.
 
-### 3.4 Battler Selecting Scene
+### 3.4 BattlerSelectingCanvas (within BattleScene)
 
 **UI Layout:** A horizontally scrollable table for choosing participants.  
 **Columns per Character:**
@@ -87,7 +89,7 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Interaction:** A selection button associated with each character entry at the bottom.  
 **Verification:** Choosing a character triggers a confirmation popup.
 
-### 3.5 Strategy Selecting Scene
+### 3.5 StrategySelectingCanvas (within BattleScene)
 
 **Top Bar:** A button to return to character selection (top right) and a turn counter (e.g., Turn 3/7) at top middle.  
 **Middle Section:** Displays the user's selected character (left) and opponent (right). Clicking a character toggles their must-lose conditions.  
@@ -98,7 +100,7 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 
 **Interaction:** Placeholders support **Drag & Drop** from the inventory.
 
-### 3.6 Battle Scene
+### 3.6 BattleCanvas (within BattleScene)
 
 **Top UI:** Turn tracker (top middle) and a pause button below it.  
 *Note:* Pausing must nullify any ongoing LLM calls.  
@@ -108,9 +110,9 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Dialogue Area:** Bottom 1/3 of the screen displaying speaker name and speech text.  
 **Action:** A text field is provided for specific player-driven actions.
 
-### 3.7 Battle Result & Ending
+### 3.7 BattleResultCanvas & Ending
 
-**Result Scene:** Displays win/lose text at the top and a close button at the bottom to transition to the next info-gathering phase.  
+**BattleResultCanvas (within BattleScene):** Displays win/lose text at the top and a close button at the bottom to transition to the next info-gathering phase.  
 **Ending Scene:** Features final messages, a prominent "Thank You" text, and a close button to exit the game.
 
 ## Part 4. Data & Architecture
