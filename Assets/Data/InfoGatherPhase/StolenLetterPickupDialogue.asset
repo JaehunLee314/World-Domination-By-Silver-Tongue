@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40fc9b5016aa1204392d41e373f95080, type: 3}
+  m_Name: StolenLetterPickupDialogue
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
+  lines:
+  - speakerName: Investigator
+    text: A letter... half-burnt in the fireplace. Someone tried to destroy this.
+    speakerPortrait: {fileID: 0}
+  - speakerName: Investigator
+    text: '"...meet me at the old pier, midnight. Come alone. Bring the documents
+      or the deal is off."'
+    speakerPortrait: {fileID: 0}
+  - speakerName: Investigator
+    text: No signature. But this handwriting... I should hold onto this.
+    speakerPortrait: {fileID: 0}

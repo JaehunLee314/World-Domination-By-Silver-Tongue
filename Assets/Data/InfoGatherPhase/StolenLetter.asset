@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f7fb95f60f2d41acd4da1b903eac3, type: 3}
+  m_Name: StolenLetter
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.ItemData
+  itemName: Stolen Letter
+  itemType: 3
+  description: A partially burnt letter found in the fireplace. It mentions a meeting
+    at the old pier and some kind of deal involving documents.
+  pickupDialogue: {fileID: 11400000, guid: 2b3df0e43f34eb44f8076470c3c4f3ef, type: 2}
