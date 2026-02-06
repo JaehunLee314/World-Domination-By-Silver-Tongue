@@ -67,6 +67,12 @@ namespace SilverTongue.BattleScene
         private void Start()
         {
             InitializeLLMService();
+
+            // Use opponent from GameManager if set (game loop flow),
+            // otherwise fall back to serialized field (standalone testing)
+            if (GameManager.Instance != null && GameManager.Instance.currentOpponent != null)
+                opponent = GameManager.Instance.currentOpponent;
+
             if (conversationHistoryCanvas != null)
                 conversationHistoryCanvas.SetActive(false);
             SwitchPhase(BattlePhase.BattlerSelecting);

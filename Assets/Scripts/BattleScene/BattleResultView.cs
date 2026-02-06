@@ -30,7 +30,7 @@ namespace SilverTongue.BattleScene
 
         private void OnCloseClicked()
         {
-            Debug.Log("[BattleResultView] Close clicked - would transition to next scene");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("DummyInfoGatheringScene");
         }
     }
 }
