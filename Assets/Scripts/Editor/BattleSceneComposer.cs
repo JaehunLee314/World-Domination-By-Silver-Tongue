@@ -261,10 +261,6 @@ public class BattleSceneComposer
         so.FindProperty("logScrollRect").objectReferenceValue = FindInChildren<ScrollRect>(root, "Canvas/DialogueArea/LogScrollRect");
         so.FindProperty("logText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/LogScrollRect/Viewport/Content");
 
-        // Action
-        so.FindProperty("actionInputField").objectReferenceValue = FindInChildren<TMPro.TMP_InputField>(root, "Canvas/DialogueArea/ActionRow/ActionInputField");
-        so.FindProperty("sendActionButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/DialogueArea/ActionRow/SendActionButton");
-
         so.ApplyModifiedProperties();
         Debug.Log("[BattleSceneComposer] Wired BattleView");
     }

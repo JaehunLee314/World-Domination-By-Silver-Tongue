@@ -158,8 +158,25 @@ namespace SilverTongue.BattleScene
             _manager.ReturnToBattlerSelection();
         }
 
+        private void CollectAndSetAgenda()
+        {
+            var entries = new AgendaEntry[agendaSlots.Length];
+            for (int i = 0; i < agendaSlots.Length; i++)
+            {
+                entries[i] = new AgendaEntry
+                {
+                    PointText = agendaSlots[i].pointText,
+                    Skill = agendaSlots[i].assignedSkill,
+                    Evidence = agendaSlots[i].assignedItem
+                };
+            }
+            _manager.SetAgenda(entries);
+        }
+
         private void OnConfirmStrategy()
         {
+            CollectAndSetAgenda();
+
             if (_manager.IsPausedFromBattle)
                 _manager.ResumeFromStrategy();
             else

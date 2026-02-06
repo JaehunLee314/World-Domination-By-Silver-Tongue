@@ -667,12 +667,12 @@ public class BattleUIBuilder
         pauseRt.anchoredPosition = new Vector2(0, 5);
         pauseRt.sizeDelta = new Vector2(100, 35);
 
-        // Log button (right)
+        // Log button (left, per spec §3.7)
         var logBtnB = CreateButton("LogButton", topUI.transform, "LOG", new Vector2(80, 35),
             new Color(0.3f, 0.3f, 0.5f));
         var logBtnBRt = logBtnB.GetComponent<RectTransform>();
-        SetAnchors(logBtnBRt, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(1, 0.5f));
-        logBtnBRt.anchoredPosition = new Vector2(-15, 0);
+        SetAnchors(logBtnBRt, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(0, 0.5f));
+        logBtnBRt.anchoredPosition = new Vector2(15, 0);
         logBtnBRt.sizeDelta = new Vector2(80, 35);
 
         // === STAGE AREA (middle 55%) ===
@@ -751,9 +751,9 @@ public class BattleUIBuilder
         dialogTextObj.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 60);
         AddTMP(dialogTextObj, "", 18, TextAlignmentOptions.TopLeft);
 
-        // Log scroll (using DefaultControls)
+        // Log scroll (using DefaultControls) - expanded since no input row
         var (logScrollRect, logContentRt) = CreateScrollView("LogScrollRect", dialogueArea.transform, horizontal: false, vertical: true);
-        logScrollRect.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 60);
+        logScrollRect.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 100);
         logScrollRect.GetComponent<Image>().color = new Color(0.05f, 0.05f, 0.08f, 0.8f);
 
         // Add the log text to the Content
@@ -762,41 +762,6 @@ public class BattleUIBuilder
         logContentRt.offsetMax = new Vector2(-5, 0);
         var logCsf = logContentRt.gameObject.AddComponent<ContentSizeFitter>();
         logCsf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        // Action input row
-        var actionRow = CreateUIObject("ActionRow", dialogueArea.transform);
-        actionRow.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 40);
-        var actionHlg = actionRow.AddComponent<HorizontalLayoutGroup>();
-        actionHlg.spacing = 10;
-        actionHlg.childAlignment = TextAnchor.MiddleCenter;
-        actionHlg.childControlWidth = false;
-        actionHlg.childControlHeight = true;
-        actionHlg.childForceExpandWidth = false;
-
-        // Input field
-        var inputObj = CreateUIObject("ActionInputField", actionRow.transform);
-        inputObj.GetComponent<RectTransform>().sizeDelta = new Vector2(500, 35);
-        var inputImg = inputObj.AddComponent<Image>();
-        inputImg.color = new Color(0.15f, 0.15f, 0.2f, 1f);
-        var inputField = inputObj.AddComponent<TMP_InputField>();
-
-        var inputTextArea = CreateUIObject("Text Area", inputObj.transform);
-        StretchFill(inputTextArea.GetComponent<RectTransform>());
-        var inputText = CreateUIObject("Text", inputTextArea.transform);
-        StretchFill(inputText.GetComponent<RectTransform>());
-        var tmpInput = AddTMP(inputText, "", 16, TextAlignmentOptions.Left);
-        inputField.textComponent = tmpInput;
-
-        var phObj = CreateUIObject("Placeholder", inputTextArea.transform);
-        StretchFill(phObj.GetComponent<RectTransform>());
-        var phTmp = AddTMP(phObj, "Type your argument...", 16, TextAlignmentOptions.Left,
-            new Color(0.4f, 0.4f, 0.4f));
-        inputField.placeholder = phTmp;
-        inputField.textViewport = inputTextArea.GetComponent<RectTransform>();
-
-        // Send button
-        CreateButton("SendActionButton", actionRow.transform, "SEND", new Vector2(80, 35),
-            new Color(0.2f, 0.6f, 1f));
 
         foreach (var old in instance.GetComponents<SilverTongue.BattleScene.BattleView>())
             Object.DestroyImmediate(old);

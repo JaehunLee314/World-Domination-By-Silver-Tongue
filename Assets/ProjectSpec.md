@@ -122,7 +122,6 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Animation:** Characters move to the middle when speaking and return after finishing.  
 **Visual State:** While not talking, characters should be darkened.  
 **Dialogue Area:** Bottom 1/3 of the screen displaying speaker name and speech text.  
-**Action:** A text field is provided for specific player-driven actions.
 
 ### 3.8 BattleResultCanvas & Ending
 
@@ -159,7 +158,7 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 **Output Format:** Requires `[Thought Process] Dialogue <tags>` (e.g., `<evidence_used=ID>`).  
 **The Judge:**
 
-- **Fast Check:** Local Regex/rule-based check for win/lose conditions every turn.
+- **Fast Check:** Local Regex/rule-based check for lose conditions every turn.
 - **Final Verdict:** An LLM call reviews the full history to confirm if persuasion was successful based on context (Win/Lose/Draw).
 
 ## Part 5. Technical Implementation Rules
