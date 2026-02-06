@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 046af0c82335e4e8e8596357d89e7423, type: 3}
+  m_Name: Skill_LogicalDeduction
+  m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
+  itemId: sk_logic
+  itemName: Logical Deduction
+  itemImage: {fileID: 0}
+  itemType: 1
+  description: A skill book teaching rigorous logical argumentation and deductive
+    reasoning.
+  skillName: Logical Deduction
+  promptModifier: Use strict logical reasoning. Present arguments as formal deductions.
+    Counter emotional appeals with cold hard facts.
+  thinkingEffort: 2
