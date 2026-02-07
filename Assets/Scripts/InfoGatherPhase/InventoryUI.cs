@@ -107,7 +107,7 @@ namespace InfoGatherPhase
 
         private void ShowDetail(ItemData item)
         {
-            detailIcon.sprite = item.icon;
+            detailIcon.sprite = TextureToSprite(item.icon);
             detailIcon.enabled = item.icon != null;
             detailName.text = item.itemName;
             detailType.text = item.itemType.ToString();
@@ -134,6 +134,12 @@ namespace InfoGatherPhase
         private void OnDialogueEnded()
         {
             inventoryButton.interactable = true;
+        }
+
+        private static Sprite TextureToSprite(Texture2D tex)
+        {
+            if (tex == null) return null;
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
         }
     }
 }

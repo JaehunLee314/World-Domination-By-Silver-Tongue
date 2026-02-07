@@ -19,11 +19,17 @@ namespace InfoGatherPhase
             itemData = data;
             onClick = clickCallback;
 
-            iconImage.sprite = data.icon;
+            iconImage.sprite = TextureToSprite(data.icon);
             nameLabel.text = data.itemName;
 
             slotButton.onClick.RemoveAllListeners();
             slotButton.onClick.AddListener(() => onClick?.Invoke(itemData));
+        }
+
+        private static Sprite TextureToSprite(Texture2D tex)
+        {
+            if (tex == null) return null;
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
         }
     }
 }

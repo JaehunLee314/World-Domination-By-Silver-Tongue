@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40fc9b5016aa1204392d41e373f95080, type: 3}
+  m_Name: InspectionReportPickup
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
+  lines:
+  - speakerName: Me
+    text: 'An internal document from the IT Corp. "Safety Inspection: FAILED."'
+    emotion: 4
+  - speakerName: Me
+    text: '"Brake upgrades cancelled due to budget constraints." So that''s the real
+      reason the train is failing.'
+    emotion: 2
+  - speakerName: Me
+    text: "It's not a grand conspiracy to hijack our brains\u2014it's just a greedy
+      corporation being too cheap to maintain their own equipment."
+    emotion: 1

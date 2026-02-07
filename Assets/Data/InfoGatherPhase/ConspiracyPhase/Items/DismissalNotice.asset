@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f7fb95f60f2d41acd4da1b903eac3, type: 3}
+  m_Name: DismissalNotice
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.ItemData
+  itemName: Dismissal Notice
+  itemType: 0
+  icon: {fileID: 2800000, guid: 19756ac37eefb704895dc10d6e6e2a17, type: 3}
+  description: A notification text about being fired by an AI.
+  pickupDialogue: {fileID: 11400000, guid: cfe7862ce8489c34da3c1d12f149843b, type: 2}

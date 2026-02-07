@@ -6280,6 +6280,7 @@ MonoBehaviour:
   dialoguePanel: {fileID: 989072164}
   nameText: {fileID: 1473399531}
   lineText: {fileID: 1553115267}
+  charsPerSecond: 40
 --- !u!114 &989072167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7698,8 +7699,7 @@ MeshRenderer:
   m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 6084a88283e4216448c7ac261f42171b, type: 2}
+  m_Materials: []
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
