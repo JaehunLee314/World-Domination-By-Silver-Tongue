@@ -10,6 +10,7 @@ namespace InfoGatherPhase
         [SerializeField] private PanelClickDetector clickDetector;
         [SerializeField] private DialogueManager dialogueManager;
         [SerializeField] private InventoryUI inventoryUI;
+        [SerializeField] private BattleDecisionUI battleDecisionUI;
 
         private void OnEnable()
         {
@@ -19,6 +20,7 @@ namespace InfoGatherPhase
             inputHandler.OnClickInput += HandleClick;
 
             movementController.OnArrivedAtNode += HandleArrival;
+            clickDetector.OnClickableHit += HandleClickableHit;
 
             dialogueManager.OnDialogueStarted += OnDialogueStarted;
             dialogueManager.OnDialogueEnded += OnDialogueEnded;
@@ -29,6 +31,12 @@ namespace InfoGatherPhase
                 inventoryUI.OnInventoryOpened += OnInventoryOpened;
                 inventoryUI.OnInventoryClosed += OnInventoryClosed;
             }
+
+            if (battleDecisionUI != null)
+            {
+                battleDecisionUI.OnConfront += HandleConfront;
+                battleDecisionUI.OnDecline += HandleDecline;
+            }
         }
 
         private void OnDisable()
@@ -37,6 +45,7 @@ namespace InfoGatherPhase
             inputHandler.OnClickInput -= HandleClick;
 
             movementController.OnArrivedAtNode -= HandleArrival;
+            clickDetector.OnClickableHit -= HandleClickableHit;
 
             dialogueManager.OnDialogueStarted -= OnDialogueStarted;
             dialogueManager.OnDialogueEnded -= OnDialogueEnded;
@@ -46,10 +55,17 @@ namespace InfoGatherPhase
                 inventoryUI.OnInventoryOpened -= OnInventoryOpened;
                 inventoryUI.OnInventoryClosed -= OnInventoryClosed;
             }
+
+            if (battleDecisionUI != null)
+            {
+                battleDecisionUI.OnConfront -= HandleConfront;
+                battleDecisionUI.OnDecline -= HandleDecline;
+            }
         }
 
         private void HandleClick()
         {
+            if (battleDecisionUI != null && battleDecisionUI.IsOpen) return;
             if (inventoryUI != null && inventoryUI.IsOpen) return;
 
             if (dialogueManager.IsActive)
@@ -67,8 +83,9 @@ namespace InfoGatherPhase
         private void HandleArrival(MovementNode node)
         {
             Debug.Log($"[PhaseManager] Arrived at node: {node.name}");
-            if (node.ArrivalDialogue != null)
+            if (node.ArrivalDialogue != null && !node.HasPlayedArrival)
             {
+                node.MarkArrivalPlayed();
                 dialogueManager.StartDialogue(node.ArrivalDialogue);
             }
         }
@@ -90,6 +107,42 @@ namespace InfoGatherPhase
 
         private void OnInventoryClosed()
         {
+            movementController.IsLocked = false;
+        }
+
+        private ClickableVillain activeVillain;
+
+        private void HandleClickableHit(ClickableObject clickable)
+        {
+            if (clickable is ClickableVillain villain)
+            {
+                activeVillain = villain;
+                villain.OnDialogueFinished += ShowBattleDecision;
+            }
+        }
+
+        private void ShowBattleDecision()
+        {
+            if (activeVillain != null)
+            {
+                activeVillain.OnDialogueFinished -= ShowBattleDecision;
+                activeVillain = null;
+            }
+
+            if (battleDecisionUI == null) return;
+            movementController.IsLocked = true;
+            battleDecisionUI.Show();
+        }
+
+        private void HandleConfront()
+        {
+            Debug.Log("[PhaseManager] Player chose to confront villain - loading battle scene");
+            // TODO: Load battle scene
+        }
+
+        private void HandleDecline()
+        {
+            Debug.Log("[PhaseManager] Player chose 'not yet'");
             movementController.IsLocked = false;
         }
     }

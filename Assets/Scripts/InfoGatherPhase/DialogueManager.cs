@@ -6,7 +6,6 @@ namespace InfoGatherPhase
     public class DialogueManager : MonoBehaviour
     {
         [SerializeField] private DialogueUI dialogueUI;
-        [SerializeField] private SpeakerPanel speakerPanel;
 
         public bool IsActive { get; private set; }
 
@@ -15,6 +14,7 @@ namespace InfoGatherPhase
 
         private DialogueEvent currentEvent;
         private int currentLineIndex;
+        private CharacterPanel currentPanel;
 
         public void StartDialogue(DialogueEvent dialogueEvent)
         {
@@ -47,7 +47,18 @@ namespace InfoGatherPhase
         {
             DialogueLine line = currentEvent.lines[currentLineIndex];
             dialogueUI.Show(line.speakerName, line.text);
-            speakerPanel.Show(line.speakerPortrait);
+
+            CharacterPanel nextPanel = CharacterPanel.Get(line.speakerName);
+
+            if (nextPanel != currentPanel)
+            {
+                if (currentPanel != null)
+                    currentPanel.Hide();
+                currentPanel = nextPanel;
+            }
+
+            if (currentPanel != null)
+                currentPanel.Show(line.emotion);
         }
 
         private void EndDialogue()
@@ -57,7 +68,12 @@ namespace InfoGatherPhase
             currentLineIndex = 0;
 
             dialogueUI.Hide();
-            speakerPanel.Hide();
+
+            if (currentPanel != null)
+            {
+                currentPanel.Hide();
+                currentPanel = null;
+            }
 
             OnDialogueEnded?.Invoke();
         }

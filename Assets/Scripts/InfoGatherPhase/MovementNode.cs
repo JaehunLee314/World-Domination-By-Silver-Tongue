@@ -32,8 +32,16 @@ namespace InfoGatherPhase
         [Header("Arrival")]
         [SerializeField] private DialogueEvent arrivalDialogue;
 
+        private bool hasPlayedArrival;
+
         public CameraSettings CamSettings => cameraSettings;
         public DialogueEvent ArrivalDialogue => arrivalDialogue;
+        public bool HasPlayedArrival => hasPlayedArrival;
+
+        public void MarkArrivalPlayed()
+        {
+            hasPlayedArrival = true;
+        }
 
         public MovementNode GetNeighbor(Vector2 direction)
         {

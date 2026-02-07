@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,6 +9,8 @@ namespace InfoGatherPhase
         [SerializeField] private Camera cam;
         [SerializeField] private LayerMask clickableLayer;
         [SerializeField] private float maxRayDistance = 100f;
+
+        public event Action<ClickableObject> OnClickableHit;
 
         private DialogueManager dialogueManager;
 
@@ -32,14 +35,15 @@ namespace InfoGatherPhase
             if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, clickableLayer))
             {
                 Debug.Log($"[ClickDetector] Hit: {hit.collider.name} (layer {hit.collider.gameObject.layer}) at {hit.point}");
-                ClickableItem item = hit.collider.GetComponent<ClickableItem>();
-                if (item != null)
+                ClickableObject clickable = hit.collider.GetComponent<ClickableObject>();
+                if (clickable != null)
                 {
-                    item.OnClicked(dialogueManager);
+                    clickable.OnClicked(dialogueManager);
+                    OnClickableHit?.Invoke(clickable);
                 }
                 else
                 {
-                    Debug.Log($"[ClickDetector] Hit object has no ClickableItem component");
+                    Debug.Log($"[ClickDetector] Hit object has no ClickableObject component");
                 }
             }
             else
