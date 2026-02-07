@@ -32,6 +32,12 @@ namespace InfoGatherPhase
         {
             if (!IsActive) return;
 
+            if (dialogueUI.IsTyping)
+            {
+                dialogueUI.CompleteTyping();
+                return;
+            }
+
             currentLineIndex++;
 
             if (currentLineIndex >= currentEvent.lines.Length)

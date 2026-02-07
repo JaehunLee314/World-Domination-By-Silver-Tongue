@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 namespace InfoGatherPhase
@@ -25,6 +26,8 @@ namespace InfoGatherPhase
         private Vector3 homePosition;
         private Quaternion homeRotation;
         private bool isSpeaking;
+        private Vector3 bounceOffset;
+        private Tween bounceTween;
 
         private static readonly Dictionary<string, CharacterPanel> registry = new Dictionary<string, CharacterPanel>();
 
@@ -56,7 +59,7 @@ namespace InfoGatherPhase
             if (!isSpeaking || cam == null) return;
 
             Vector3 worldPos = cam.transform.TransformPoint(speakingOffset);
-            transform.position = worldPos;
+            transform.position = worldPos + cam.transform.TransformDirection(bounceOffset);
             transform.rotation = cam.transform.rotation;
         }
 
@@ -71,14 +74,31 @@ namespace InfoGatherPhase
         {
             ApplyTexture(emotion);
             isSpeaking = true;
+            PlayBounce();
+        }
+
+        private void PlayBounce()
+        {
+            bounceTween?.Kill();
+            bounceOffset = Vector3.zero;
+            bounceTween = DOTween.Punch(() => bounceOffset, x => bounceOffset = x,
+                new Vector3(0f, 0.12f, 0f), 0.35f, 6, 0.6f)
+                .SetEase(Ease.OutQuad);
         }
 
         public void Hide()
         {
+            bounceTween?.Kill();
+            bounceOffset = Vector3.zero;
             transform.position = homePosition;
             transform.rotation = homeRotation;
             ApplyTexture(defaultEmotion);
             isSpeaking = false;
+        }
+
+        private void OnDestroy()
+        {
+            bounceTween?.Kill();
         }
 
         private Texture2D FindTexture(Emotion emotion)
@@ -101,7 +121,7 @@ namespace InfoGatherPhase
             if (tex != null)
             {
                 meshRenderer.GetPropertyBlock(propBlock);
-                propBlock.SetTexture("_BaseMap", tex);
+                propBlock.SetTexture("_MainTex", tex);
                 meshRenderer.SetPropertyBlock(propBlock);
             }
         }

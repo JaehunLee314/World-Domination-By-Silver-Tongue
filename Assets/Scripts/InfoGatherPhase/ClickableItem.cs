@@ -5,8 +5,10 @@ namespace InfoGatherPhase
     public class ClickableItem : ClickableObject
     {
         [SerializeField] private ItemData itemData;
+        [SerializeField] private bool destroyAfterPickup = true;
 
         private DialogueManager cachedDM;
+        private bool collected;
 
         public ItemData ItemData => itemData;
 
@@ -14,32 +16,39 @@ namespace InfoGatherPhase
         {
             if (itemData == null) return;
 
-            if (GameManager.Instance.HasItem(itemData.itemName))
+            if (collected || GameManager.Instance.HasItem(itemData.itemName))
             {
-                Debug.Log($"[ClickableItem] Already collected: {itemData.itemName}");
+                if (!destroyAfterPickup && itemData.pickupDialogue != null)
+                {
+                    dialogueManager.StartDialogue(itemData.pickupDialogue);
+                }
                 return;
             }
-
-            GameManager.Instance.CollectItem(itemData);
 
             if (itemData.pickupDialogue != null)
             {
                 cachedDM = dialogueManager;
-                dialogueManager.OnDialogueEnded += DestroyAfterDialogue;
+                dialogueManager.OnDialogueEnded += OnDialogueFinished;
                 dialogueManager.StartDialogue(itemData.pickupDialogue);
             }
             else
             {
-                Destroy(gameObject);
+                GameManager.Instance.CollectItem(itemData);
+                collected = true;
+                if (destroyAfterPickup)
+                    Destroy(gameObject);
             }
         }
 
-        private void DestroyAfterDialogue()
+        private void OnDialogueFinished()
         {
             if (cachedDM != null)
-                cachedDM.OnDialogueEnded -= DestroyAfterDialogue;
+                cachedDM.OnDialogueEnded -= OnDialogueFinished;
 
-            Destroy(gameObject);
+            GameManager.Instance.CollectItem(itemData);
+            collected = true;
+            if (destroyAfterPickup)
+                Destroy(gameObject);
         }
     }
 }

@@ -13,21 +13,12 @@ MonoBehaviour:
   m_Name: DemoDialogue
   m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
   lines:
-  - speakerName: ???
-    text: ...Who are you? How did you get in here?
-    speakerPortrait: {fileID: 0}
-  - speakerName: Investigator
-    text: Relax. I'm just looking around. The door was open.
-    speakerPortrait: {fileID: 0}
-  - speakerName: ???
-    text: "Open? That's impossible. I locked it myself before\u2014 ...never mind.
-      State your business or leave."
-    speakerPortrait: {fileID: 0}
-  - speakerName: Investigator
-    text: I heard something happened here last night. Thought I'd take a look for
-      myself.
-    speakerPortrait: {fileID: 0}
-  - speakerName: Marcus Webb
-    text: ...Fine. Look around if you must. But don't touch anything that isn't yours.
-      And the name's Webb. Marcus Webb.
-    speakerPortrait: {fileID: 0}
+  - speakerName: Menhera
+    text: Hi
+    emotion: 0
+  - speakerName: Conspiracy
+    text: What?
+    emotion: 0
+  - speakerName: Menhera
+    text: I said hi
+    emotion: 0
