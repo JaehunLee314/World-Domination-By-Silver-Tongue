@@ -133,8 +133,14 @@ public class BattleSceneComposer
 
     static void DestroyIfExists(string name)
     {
-        var obj = GameObject.Find(name);
-        if (obj != null) Object.DestroyImmediate(obj);
+        // Destroy ALL root objects with this name (including inactive ones)
+        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        var rootObjects = scene.GetRootGameObjects();
+        foreach (var root in rootObjects)
+        {
+            if (root.name == name)
+                Object.DestroyImmediate(root);
+        }
     }
 
     static T FindInChildren<T>(GameObject root, string path) where T : Component
@@ -245,8 +251,9 @@ public class BattleSceneComposer
 
         // Top UI
         so.FindProperty("turnTrackerText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/TopUI/TurnTrackerText");
-        so.FindProperty("pauseButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/TopUI/PauseButton");
-        so.FindProperty("pauseButtonText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/TopUI/PauseButton/Text");
+        so.FindProperty("autoProgressButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/DialogueArea/AutoProgressButton");
+        so.FindProperty("autoProgressButtonText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/AutoProgressButton/Text");
+        so.FindProperty("goToStrategyButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/TopUI/GoToStrategyButton");
         so.FindProperty("logButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/TopUI/LogButton");
 
         // Characters
@@ -255,11 +262,17 @@ public class BattleSceneComposer
         so.FindProperty("playerNameLabel").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/StageArea/PlayerCharacterPanel/PlayerNameLabel");
         so.FindProperty("opponentNameLabel").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/StageArea/OpponentCharacterPanel/OpponentNameLabel");
 
+        // Stage Animation (panel RectTransforms for smooth movement)
+        var playerPanelTr = root.transform.Find("Canvas/StageArea/PlayerCharacterPanel");
+        so.FindProperty("playerPanel").objectReferenceValue = playerPanelTr != null ? playerPanelTr.GetComponent<RectTransform>() : null;
+        var opponentPanelTr = root.transform.Find("Canvas/StageArea/OpponentCharacterPanel");
+        so.FindProperty("opponentPanel").objectReferenceValue = opponentPanelTr != null ? opponentPanelTr.GetComponent<RectTransform>() : null;
+
         // Dialogue
         so.FindProperty("speakerNameText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/SpeakerNameText");
         so.FindProperty("dialogueText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/DialogueText");
-        so.FindProperty("logScrollRect").objectReferenceValue = FindInChildren<ScrollRect>(root, "Canvas/DialogueArea/LogScrollRect");
-        so.FindProperty("logText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/LogScrollRect/Viewport/Content");
+        so.FindProperty("thoughtText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/ThoughtText");
+        so.FindProperty("dialogueAreaButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/DialogueArea");
 
         so.ApplyModifiedProperties();
         Debug.Log("[BattleSceneComposer] Wired BattleView");

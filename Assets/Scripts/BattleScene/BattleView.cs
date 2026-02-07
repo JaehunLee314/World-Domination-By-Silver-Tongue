@@ -13,8 +13,9 @@ namespace SilverTongue.BattleScene
     {
         [Header("Top UI")]
         [SerializeField] private TextMeshProUGUI turnTrackerText;
-        [SerializeField] private Button pauseButton;
-        [SerializeField] private TextMeshProUGUI pauseButtonText;
+        [SerializeField] private Button autoProgressButton;
+        [SerializeField] private TextMeshProUGUI autoProgressButtonText;
+        [SerializeField] private Button goToStrategyButton;
         [SerializeField] private Button logButton;
 
         [Header("Character Display")]
@@ -23,20 +24,25 @@ namespace SilverTongue.BattleScene
         [SerializeField] private TextMeshProUGUI playerNameLabel;
         [SerializeField] private TextMeshProUGUI opponentNameLabel;
 
+        [Header("Stage Animation")]
+        [SerializeField] private RectTransform playerPanel;
+        [SerializeField] private RectTransform opponentPanel;
+
         [Header("Dialogue Area")]
         [SerializeField] private TextMeshProUGUI speakerNameText;
         [SerializeField] private TextMeshProUGUI dialogueText;
-        [SerializeField] private ScrollRect logScrollRect;
-        [SerializeField] private TextMeshProUGUI logText;
+        [SerializeField] private TextMeshProUGUI thoughtText;
+        [SerializeField] private Button dialogueAreaButton;
 
         [Header("Visual Settings")]
         [SerializeField] private Color activeSpeakerColor = Color.white;
         [SerializeField] private Color inactiveSpeakerColor = new Color(0.3f, 0.3f, 0.3f, 1f);
+        [SerializeField] private float panelMoveDuration = 0.4f;
 
         private BattleSceneManager _manager;
-        private bool _isPaused;
+        private bool _isAutoProgress;
         private bool _isBattleActive;
-        private List<string> _battleLog = new List<string>();
+        private bool _waitingForInput; // true when auto-progress is off and waiting for player click
 
         // Cumulative LLM conversation histories (mirrored perspectives)
         private List<LLMMessage> _playerHistory = new List<LLMMessage>();
@@ -44,18 +50,30 @@ namespace SilverTongue.BattleScene
         private string _playerSystemPrompt;
         private string _opponentSystemPrompt;
 
+        // Stage animation: original anchor positions
+        private Vector2 _playerPanelOrigAnchorMin;
+        private Vector2 _playerPanelOrigAnchorMax;
+        private Vector2 _opponentPanelOrigAnchorMin;
+        private Vector2 _opponentPanelOrigAnchorMax;
+
+        // Center anchors for "speaking" position
+        private static readonly Vector2 CenterAnchorMin = new Vector2(0.25f, 0.1f);
+        private static readonly Vector2 CenterAnchorMax = new Vector2(0.55f, 0.95f);
+
         public void Initialize(BattleSceneManager manager)
         {
             _manager = manager;
-            _isPaused = false;
+            _isAutoProgress = false;
             _isBattleActive = true;
-            _battleLog.Clear();
+            _waitingForInput = false;
             _playerHistory.Clear();
             _opponentHistory.Clear();
 
+            CacheOriginalPanelPositions();
             SetupDisplay();
             SetupButtons();
             UpdateTurnTracker();
+            UpdateAutoProgressUI();
 
             _playerSystemPrompt = BuildPlayerSystemPrompt();
             _opponentSystemPrompt = BuildOpponentSystemPrompt();
@@ -66,13 +84,31 @@ namespace SilverTongue.BattleScene
 
         public void Resume()
         {
-            _isPaused = false;
+            _isAutoProgress = false;
             _isBattleActive = true;
+            _waitingForInput = false;
             UpdateTurnTracker();
+            UpdateAutoProgressUI();
 
             // Rebuild player prompt in case agenda changed during pause
             _playerSystemPrompt = BuildPlayerSystemPrompt();
             ContinueAutoBattle();
+        }
+
+        // ─── Setup ──────────────────────────────────────────────────────────
+
+        private void CacheOriginalPanelPositions()
+        {
+            if (playerPanel != null)
+            {
+                _playerPanelOrigAnchorMin = playerPanel.anchorMin;
+                _playerPanelOrigAnchorMax = playerPanel.anchorMax;
+            }
+            if (opponentPanel != null)
+            {
+                _opponentPanelOrigAnchorMin = opponentPanel.anchorMin;
+                _opponentPanelOrigAnchorMax = opponentPanel.anchorMax;
+            }
         }
 
         private void SetupDisplay()
@@ -90,18 +126,27 @@ namespace SilverTongue.BattleScene
 
             dialogueText.text = "";
             speakerNameText.text = "";
-            logText.text = "";
+            thoughtText.text = "";
         }
 
         private void SetupButtons()
         {
-            pauseButton.onClick.RemoveAllListeners();
-            pauseButton.onClick.AddListener(OnPause);
+            autoProgressButton.onClick.RemoveAllListeners();
+            autoProgressButton.onClick.AddListener(OnToggleAutoProgress);
+
+            goToStrategyButton.onClick.RemoveAllListeners();
+            goToStrategyButton.onClick.AddListener(OnGoToStrategy);
 
             if (logButton != null)
             {
                 logButton.onClick.RemoveAllListeners();
                 logButton.onClick.AddListener(() => _manager.ShowConversationHistory());
+            }
+
+            if (dialogueAreaButton != null)
+            {
+                dialogueAreaButton.onClick.RemoveAllListeners();
+                dialogueAreaButton.onClick.AddListener(OnDialogueAreaClicked);
             }
         }
 
@@ -110,6 +155,49 @@ namespace SilverTongue.BattleScene
             turnTrackerText.text = $"Turn {_manager.CurrentTurn}/{_manager.MaxTurns}";
         }
 
+        private void UpdateAutoProgressUI()
+        {
+            if (autoProgressButtonText != null)
+                autoProgressButtonText.text = _isAutoProgress ? "AUTO: ON" : "AUTO: OFF";
+
+            var btnImg = autoProgressButton.GetComponent<Image>();
+            if (btnImg != null)
+                btnImg.color = _isAutoProgress
+                    ? new Color(0.2f, 0.7f, 0.3f)
+                    : new Color(0.5f, 0.5f, 0.2f);
+
+            goToStrategyButton.interactable = !_isAutoProgress;
+        }
+
+        // ─── Button Handlers ────────────────────────────────────────────────
+
+        private void OnToggleAutoProgress()
+        {
+            _isAutoProgress = !_isAutoProgress;
+            UpdateAutoProgressUI();
+
+            // If turning on auto and we were waiting, unblock the existing loop
+            // (don't call ContinueAutoBattle - the existing async loop resumes naturally)
+            if (_isAutoProgress && _waitingForInput)
+                _waitingForInput = false;
+        }
+
+        private void OnGoToStrategy()
+        {
+            if (_isAutoProgress) return; // disabled during auto
+            _isBattleActive = false;
+            _waitingForInput = false;
+            _manager.PauseToStrategy();
+        }
+
+        private void OnDialogueAreaClicked()
+        {
+            if (!_isAutoProgress && _waitingForInput)
+                _waitingForInput = false;
+        }
+
+        // ─── Speaker Visual State ──────────────────────────────────────────
+
         public void SetSpeaker(bool isPlayer)
         {
             playerCharacterImage.color = isPlayer ? activeSpeakerColor : inactiveSpeakerColor;
@@ -117,6 +205,47 @@ namespace SilverTongue.BattleScene
             speakerNameText.text = isPlayer
                 ? _manager.SelectedBattler.characterName
                 : _manager.Opponent.characterName;
+        }
+
+        // ─── Smooth Panel Movement (Async) ──────────────────────────────────
+
+        private async System.Threading.Tasks.Task SmoothMovePanelAsync(RectTransform panel, Vector2 targetMin, Vector2 targetMax, float duration)
+        {
+            Vector2 startMin = panel.anchorMin;
+            Vector2 startMax = panel.anchorMax;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
+                panel.anchorMin = Vector2.Lerp(startMin, targetMin, t);
+                panel.anchorMax = Vector2.Lerp(startMax, targetMax, t);
+                panel.offsetMin = Vector2.zero;
+                panel.offsetMax = Vector2.zero;
+                await Awaitable.NextFrameAsync();
+            }
+
+            panel.anchorMin = targetMin;
+            panel.anchorMax = targetMax;
+            panel.offsetMin = Vector2.zero;
+            panel.offsetMax = Vector2.zero;
+        }
+
+        private async System.Threading.Tasks.Task MovePanelToCenterAsync(bool isPlayer)
+        {
+            if (isPlayer && playerPanel != null)
+                await SmoothMovePanelAsync(playerPanel, CenterAnchorMin, CenterAnchorMax, panelMoveDuration);
+            else if (!isPlayer && opponentPanel != null)
+                await SmoothMovePanelAsync(opponentPanel, CenterAnchorMin, CenterAnchorMax, panelMoveDuration);
+        }
+
+        private async System.Threading.Tasks.Task MovePanelBackAsync(bool isPlayer)
+        {
+            if (isPlayer && playerPanel != null)
+                await SmoothMovePanelAsync(playerPanel, _playerPanelOrigAnchorMin, _playerPanelOrigAnchorMax, panelMoveDuration);
+            else if (!isPlayer && opponentPanel != null)
+                await SmoothMovePanelAsync(opponentPanel, _opponentPanelOrigAnchorMin, _opponentPanelOrigAnchorMax, panelMoveDuration);
         }
 
         // ─── Prompt Construction ────────────────────────────────────────────
@@ -223,16 +352,31 @@ namespace SilverTongue.BattleScene
             };
 
             SetSpeaker(false);
+            await MovePanelToCenterAsync(false);
+            if (!_isBattleActive) return;
+
             ShowThinking(_manager.Opponent.characterName);
             var opponentResponse = await _manager.LLMService.GenerateResponseAsync(opponentRequest);
-            if (_isPaused || !_isBattleActive) return;
+            if (!_isBattleActive) return;
 
             if (opponentResponse.Success)
             {
                 string content = CleanDialogue(opponentResponse.Content);
                 _opponentHistory.Add(new LLMMessage("model", content));
                 _playerHistory.Add(new LLMMessage("user", content));
-                ShowDialogue(_manager.Opponent.characterName, content);
+                ShowDialogue(_manager.Opponent.characterName, content, opponentResponse.ThoughtSummary);
+            }
+
+            await MovePanelBackAsync(false);
+            if (!_isBattleActive) return;
+
+            // Wait for auto-progress or manual advance
+            if (!_isAutoProgress)
+            {
+                _waitingForInput = true;
+                while (_waitingForInput && _isBattleActive)
+                    await Awaitable.NextFrameAsync();
+                if (!_isBattleActive) return;
             }
 
             // Start the battle loop
@@ -248,10 +392,13 @@ namespace SilverTongue.BattleScene
         {
             string playerThinking = GetPlayerThinkingEffort();
 
-            while (_isBattleActive && !_isPaused && _manager.CurrentTurn <= _manager.MaxTurns)
+            while (_isBattleActive && _manager.CurrentTurn <= _manager.MaxTurns)
             {
                 // ── Player's turn ──
                 SetSpeaker(true);
+                await MovePanelToCenterAsync(true);
+                if (!_isBattleActive) return;
+
                 ShowThinking(_manager.SelectedBattler.characterName);
 
                 var playerRequest = new LLMRequest
@@ -262,29 +409,42 @@ namespace SilverTongue.BattleScene
                 };
 
                 var playerResponse = await _manager.LLMService.GenerateResponseAsync(playerRequest);
-                if (_isPaused || !_isBattleActive) return;
+                if (!_isBattleActive) return;
 
                 if (playerResponse.Success)
                 {
                     string playerContent = CleanDialogue(playerResponse.Content);
                     _playerHistory.Add(new LLMMessage("model", playerContent));
                     _opponentHistory.Add(new LLMMessage("user", playerContent));
-                    ShowDialogue(_manager.SelectedBattler.characterName, playerContent);
+                    ShowDialogue(_manager.SelectedBattler.characterName, playerContent, playerResponse.ThoughtSummary);
 
                     // Fast Check: did player trigger their own lose conditions?
                     if (CheckLoseConditions(_manager.SelectedBattler.loseConditions, playerContent))
                     {
                         _isBattleActive = false;
-                        AddToLog("[JUDGE] Player triggered a lose condition!");
+                        ShowDialogue("JUDGE", "Player triggered a lose condition!", null);
                         _manager.OnBattleFinished(false);
                         return;
                     }
                 }
 
-                if (_isPaused || !_isBattleActive) return;
+                await MovePanelBackAsync(true);
+                if (!_isBattleActive) return;
+
+                // Wait for auto-progress or manual advance
+                if (!_isAutoProgress)
+                {
+                    _waitingForInput = true;
+                    while (_waitingForInput && _isBattleActive)
+                        await Awaitable.NextFrameAsync();
+                    if (!_isBattleActive) return;
+                }
 
                 // ── Opponent's turn ──
                 SetSpeaker(false);
+                await MovePanelToCenterAsync(false);
+                if (!_isBattleActive) return;
+
                 ShowThinking(_manager.Opponent.characterName);
 
                 var opponentRequest = new LLMRequest
@@ -295,31 +455,43 @@ namespace SilverTongue.BattleScene
                 };
 
                 var opponentResponse = await _manager.LLMService.GenerateResponseAsync(opponentRequest);
-                if (_isPaused || !_isBattleActive) return;
+                if (!_isBattleActive) return;
 
                 if (opponentResponse.Success)
                 {
                     string opponentContent = CleanDialogue(opponentResponse.Content);
                     _opponentHistory.Add(new LLMMessage("model", opponentContent));
                     _playerHistory.Add(new LLMMessage("user", opponentContent));
-                    ShowDialogue(_manager.Opponent.characterName, opponentContent);
+                    ShowDialogue(_manager.Opponent.characterName, opponentContent, opponentResponse.ThoughtSummary);
 
                     // Fast Check: did opponent trigger their lose conditions?
                     if (CheckLoseConditions(_manager.Opponent.loseConditions, opponentContent))
                     {
                         _isBattleActive = false;
-                        AddToLog("[JUDGE] Opponent triggered a lose condition! Player wins!");
+                        ShowDialogue("JUDGE", "Opponent triggered a lose condition! Player wins!", null);
                         _manager.OnBattleFinished(true);
                         return;
                     }
                 }
 
+                await MovePanelBackAsync(false);
+                if (!_isBattleActive) return;
+
                 _manager.AdvanceTurn();
                 UpdateTurnTracker();
+
+                // Wait for auto-progress or manual advance between turns
+                if (!_isAutoProgress)
+                {
+                    _waitingForInput = true;
+                    while (_waitingForInput && _isBattleActive)
+                        await Awaitable.NextFrameAsync();
+                    if (!_isBattleActive) return;
+                }
             }
 
             // Max turns reached → Final Verdict
-            if (_isBattleActive && !_isPaused)
+            if (_isBattleActive)
             {
                 await RunFinalVerdict();
             }
@@ -341,7 +513,7 @@ namespace SilverTongue.BattleScene
 
         private async System.Threading.Tasks.Task RunFinalVerdict()
         {
-            AddToLog("[JUDGE] Maximum turns reached. Delivering final verdict...");
+            ShowDialogue("JUDGE", "Maximum turns reached. Delivering final verdict...", null);
             ShowThinking("Judge");
 
             // Build the full debate log for the judge
@@ -377,11 +549,11 @@ namespace SilverTongue.BattleScene
             {
                 string verdict = judgeResponse.Content.Trim().ToUpper();
                 playerWon = verdict.Contains("WIN");
-                AddToLog($"[JUDGE] Final Verdict: {verdict}");
+                ShowDialogue("JUDGE", $"Final Verdict: {verdict}", judgeResponse.ThoughtSummary);
             }
             else
             {
-                AddToLog("[JUDGE] Could not reach a verdict. Defaulting to DRAW.");
+                ShowDialogue("JUDGE", "Could not reach a verdict. Defaulting to DRAW.", null);
             }
 
             _isBattleActive = false;
@@ -394,13 +566,14 @@ namespace SilverTongue.BattleScene
         {
             speakerNameText.text = speaker;
             dialogueText.text = "<i>Thinking...</i>";
+            thoughtText.text = "";
         }
 
-        public void ShowDialogue(string speaker, string text)
+        public void ShowDialogue(string speaker, string text, string thought)
         {
             speakerNameText.text = speaker;
             dialogueText.text = text;
-            AddToLog($"[{speaker}]: {text}");
+            thoughtText.text = !string.IsNullOrEmpty(thought) ? thought : "";
 
             _manager.AddConversationEntry(new ConversationEntry
             {
@@ -424,21 +597,6 @@ namespace SilverTongue.BattleScene
         {
             var match = Regex.Match(text, $"<{tagName}=([^>]+)>");
             return match.Success ? match.Groups[1].Value : null;
-        }
-
-        private void AddToLog(string entry)
-        {
-            _battleLog.Add(entry);
-            logText.text = string.Join("\n", _battleLog);
-
-            Canvas.ForceUpdateCanvases();
-            logScrollRect.verticalNormalizedPosition = 0f;
-        }
-
-        private void OnPause()
-        {
-            _isPaused = true;
-            _manager.PauseToStrategy();
         }
     }
 }
