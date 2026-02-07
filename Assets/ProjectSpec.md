@@ -17,14 +17,14 @@
 
 ### 1.3 Core Gameplay Loop
 
-The game operates on a structured ssequence of exploration, preparation, and verbal combat:
+The game operates on a structured sequence of exploration, preparation, and verbal combat:
 
 1. **Start Scene:** The initial entry point.
 2. **Info Gathering Scene:** Exploration and evidence collection via movement and interaction.
 3. **Battle Scene:** A unified scene containing multiple canvas-based UI phases:
    - **BattlerSelectingCanvas:** Choosing the active negotiator based on character profiles.
    - **StrategySelectingCanvas:** Writing a free-form strategy and selecting evidence items, with an option to loop back to Battler Selection.
-   - **BattleCanvas:** 1v1 AI-driven auto-battle utilizing character skills, strategy text, and evidence.
+   - **BattleCanvas:** 1v1 AI-driven auto-battle utilizing character with skills, strategy text, and items (evidence).
    - **BattleResultCanvas:** Outcome evaluation and reward processing.
 4. **Loop/Ending:** Return to gathering or proceed to the final conclusion.
 
@@ -128,11 +128,10 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 ### 4.1 Character ScriptableObject
 
 **Identity:** Name and profile image.
-**Stats:** Personality traits and intelligence levels.
-**Skills:** Array of inherent persuasion skills, each with: name, description, prompt modifier (injected into LLM context), and thinking effort level (Low/Medium/High).
-**Lore:** `SystemPromptLore` (Personality, secrets, and speaking style).
-**Voice Tone:** String descriptors (e.g., "Arrogant," "Shy").
-**Conditions:** `LoseConditionRule`: Phrases or behaviors that cause immediate failure.
+**Skills:** Array of inherent persuasion skills, each with: name, description, prompt modifier (injected into LLM context).
+**Intelligence:** The thinking effort level (e.g., "High," "Medium," "Low").
+**Lore:** `Lore` (Personality, secrets, and speaking style) that is injected into LLM context.
+**Conditions:** `LoseConditionEntries` are list of conditions that, if all met, result in character defeat.
 
 ### 4.2 Item ScriptableObject
 
@@ -146,11 +145,9 @@ All items are **evidence** — factual objects or information gathered during ex
 
 **AgentLLM Class:** Constructs payloads for `gemini-3-flash-preview` and parses responses.
 **Payload Components:** Role definition, world state, character lore, character skills, player strategy text, evidence items, and gameplay rules.
-**Output Format:** Requires `[Thought Process] Dialogue <tags>` (e.g., `<evidence_used=ID>`).  
+**Output Format:** Can use XML tags for structured responses (e.g., `<SPEECH>`, `<EVIDENCE_USED>`).
 **The Judge:**
-
-- **Fast Check:** Local Regex/rule-based check for lose conditions every turn.
-- **Final Verdict:** An LLM call reviews the full history to confirm if persuasion was successful based on context (Win/Lose/Draw).
+- **Turn Resolution:** After each turn, the Judge evaluates the dialogue to check if any lose conditions are met.
 
 ## Part 5. Technical Implementation Rules
 
@@ -158,13 +155,12 @@ All items are **evidence** — factual objects or information gathered during ex
 
 - `GameManager`: Persistent singleton for overall state and user items.
 - `SceneManager`: Handles logic for each specific scene.
-- `Controller`: Used for UI-specific controlling code (e.g., `InventoryController`).
 
-**View-Controller Pattern:** Managers must use "View" scripts as an abstraction layer for UI actions rather than accessing UI elements directly.
+**View-Manager Pattern:** "View" classes manage UI elements. "Manager" classes handle logic and data flow. For example a view might handle multiple buttons and animation related to the UI, while the manager handles the game logic and LLM calls. Managers should either call functions in views or subscribe to view events. View should be independent of game logic.
 
 **UI Constraints:**
 
-- **No Code-Based Generation:** All UI must be created from **Prefabs**.
+- **No Code-Based Generation:** All UI must be created from **Prefabs**. Refrain from generating UI elements purely through code.
 - **Default Transforms:** Use standard transforms; unconventional transforms are prohibited unless absolutely necessary.
 
 **Logging:** Turn-by-turn `jsonl` logs saved to reasonable path to capture full context prompts and raw LLM responses for debugging and optimization.

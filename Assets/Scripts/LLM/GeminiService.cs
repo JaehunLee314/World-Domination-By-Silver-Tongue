@@ -364,55 +364,6 @@ public class GeminiService : ILLMService
         return sb.ToString();
     }
 
-    private string ExtractJsonString(string json, int fieldStart)
-    {
-        int colonPos = json.IndexOf(":", fieldStart);
-        if (colonPos < 0) return "";
-
-        int quoteStart = json.IndexOf("\"", colonPos + 1);
-        if (quoteStart < 0) return "";
-
-        var sb = new StringBuilder();
-        int i = quoteStart + 1;
-        while (i < json.Length)
-        {
-            if (json[i] == '\\' && i + 1 < json.Length)
-            {
-                char next = json[i + 1];
-                switch (next)
-                {
-                    case 'n': sb.Append('\n'); break;
-                    case 'r': sb.Append('\r'); break;
-                    case 't': sb.Append('\t'); break;
-                    case '\\': sb.Append('\\'); break;
-                    case '"': sb.Append('"'); break;
-                    case 'u':
-                        if (i + 5 < json.Length)
-                        {
-                            string hex = json.Substring(i + 2, 4);
-                            if (int.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out int unicode))
-                            {
-                                sb.Append((char)unicode);
-                                i += 4;
-                            }
-                        }
-                        break;
-                    default: sb.Append(next); break;
-                }
-                i += 2;
-            }
-            else if (json[i] == '"')
-            {
-                break;
-            }
-            else
-            {
-                sb.Append(json[i]);
-                i++;
-            }
-        }
-        return sb.ToString();
-    }
 }
 }
 

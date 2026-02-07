@@ -38,6 +38,13 @@ namespace SilverTongue.BattleSystem
         public string damage_type;    // "Ineffective", "Normal Hit", "Critical Hit", "Trap Trigger"
         public int damage_dealt;
         public int prophet_current_sanity;
-        public string status;         // "ONGOING", "KENTA_WINS", "PROPHET_WINS"
+        public string status;         // BattleStatus.Ongoing, BattleStatus.PlayerWins, BattleStatus.OpponentWins
+    }
+
+    public static class BattleStatus
+    {
+        public const string Ongoing      = "ONGOING";
+        public const string PlayerWins   = "PLAYER_WINS";
+        public const string OpponentWins = "OPPONENT_WINS";
     }
 }

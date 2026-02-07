@@ -42,7 +42,7 @@ namespace SilverTongue.BattleSystem
                 damage_type = "Ineffective",
                 damage_dealt = 0,
                 prophet_current_sanity = currentSanity,
-                status = "ONGOING"
+                status = BattleStatus.Ongoing
             };
         }
 
@@ -93,7 +93,7 @@ namespace SilverTongue.BattleSystem
             sb.AppendLine("  \"damage_type\": \"Ineffective | Normal Hit | Critical Hit | Trap Trigger\",");
             sb.AppendLine("  \"damage_dealt\": <integer>,");
             sb.AppendLine($"  \"prophet_current_sanity\": <calculated from {currentSanity}>,");
-            sb.AppendLine("  \"status\": \"ONGOING | KENTA_WINS | PROPHET_WINS\"");
+            sb.AppendLine("  \"status\": \"ONGOING | PLAYER_WINS | OPPONENT_WINS\"");
             sb.AppendLine("}");
 
             return sb.ToString();
@@ -121,9 +121,9 @@ namespace SilverTongue.BattleSystem
                 var dmgMatch = Regex.Match(raw, @"""damage_dealt""\s*:\s*(-?\d+)");
                 if (dmgMatch.Success) int.TryParse(dmgMatch.Groups[1].Value, out damage);
 
-                string status = "ONGOING";
-                if (raw.Contains("KENTA_WINS")) status = "KENTA_WINS";
-                else if (raw.Contains("PROPHET_WINS")) status = "PROPHET_WINS";
+                string status = BattleStatus.Ongoing;
+                if (raw.Contains(BattleStatus.PlayerWins)) status = BattleStatus.PlayerWins;
+                else if (raw.Contains(BattleStatus.OpponentWins)) status = BattleStatus.OpponentWins;
 
                 string damageType = "Ineffective";
                 if (raw.Contains("Critical Hit")) damageType = "Critical Hit";

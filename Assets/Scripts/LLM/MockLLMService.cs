@@ -31,7 +31,7 @@ namespace SilverTongue.LLM
             "{\"reasoning\": \"The player used the photo album as emotional leverage. Critical strike — the opponent's composure cracked.\", \"damage_type\": \"Critical Hit\", \"damage_dealt\": 50, \"prophet_current_sanity\": 30, \"status\": \"ONGOING\"}",
             "{\"reasoning\": \"The player's argument lacked evidence. Just empty rhetoric.\", \"damage_type\": \"Ineffective\", \"damage_dealt\": 0, \"prophet_current_sanity\": 30, \"status\": \"ONGOING\"}",
             "{\"reasoning\": \"The ramen evidence struck a deep chord. The opponent's defenses are crumbling.\", \"damage_type\": \"Normal Hit\", \"damage_dealt\": 20, \"prophet_current_sanity\": 10, \"status\": \"ONGOING\"}",
-            "{\"reasoning\": \"The final appeal broke through. The opponent can no longer maintain their stance.\", \"damage_type\": \"Critical Hit\", \"damage_dealt\": 50, \"prophet_current_sanity\": 0, \"status\": \"KENTA_WINS\"}"
+            "{\"reasoning\": \"The final appeal broke through. The opponent can no longer maintain their stance.\", \"damage_type\": \"Critical Hit\", \"damage_dealt\": 50, \"prophet_current_sanity\": 0, \"status\": \"PLAYER_WINS\"}"
         };
 
         private int _playerIndex;

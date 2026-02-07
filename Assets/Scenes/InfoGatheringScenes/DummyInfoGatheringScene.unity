@@ -368,12 +368,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.DummyInfoGatheringScene.DummyInfoGatheringSceneManager
   itemsToProvide:
-  - {fileID: 11400000, guid: f3578931122a84110937f0de4a08063f, type: 2}
-  - {fileID: 11400000, guid: affb8bc1c287b4c29ae6681c565c81b8, type: 2}
-  - {fileID: 11400000, guid: 2799a64ec07e043f183778e00a210145, type: 2}
-  - {fileID: 0}
-  - {fileID: 0}
-  opponent: {fileID: 11400000, guid: 9a8a5b53883014908897b4ff3f0c4e09, type: 2}
+  - {fileID: 11400000, guid: 265135cfdce86463a94f285a2ab80d59, type: 2}
+  - {fileID: 11400000, guid: e38821de734d74561a3cb12ce075cdbc, type: 2}
+  - {fileID: 11400000, guid: 88feced46684a474caec13f388983f95, type: 2}
+  - {fileID: 11400000, guid: 9383162dd2e414003b06333e78b12b28, type: 2}
+  - {fileID: 11400000, guid: 358dac6d1444f41ed84c624724595c91, type: 2}
+  - {fileID: 11400000, guid: b5a361948304845f1a1ae871294c86f3, type: 2}
+  - {fileID: 11400000, guid: 728312946a6ab4fe7a695a2f770f6ccd, type: 2}
+  opponent: {fileID: 11400000, guid: a7992dfbeba574b089df36c0a4cdcae2, type: 2}
   view: {fileID: 1875801695}
 --- !u!4 &1327773950
 Transform:

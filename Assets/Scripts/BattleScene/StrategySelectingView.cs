@@ -24,8 +24,7 @@ namespace SilverTongue.BattleScene
         [SerializeField] private StrategyPanelUI strategyPanel;
 
         [Header("Inventory Panel")]
-        [SerializeField] private Transform inventoryGrid;
-        [SerializeField] private GameObject inventoryItemPrefab;
+        [SerializeField] private InventoryView inventoryView;
 
         [Header("Action")]
         [SerializeField] private Button confirmStrategyButton;
@@ -98,22 +97,8 @@ namespace SilverTongue.BattleScene
 
         private void PopulateInventory()
         {
-            foreach (Transform child in inventoryGrid)
-                Destroy(child.gameObject);
-
-            if (GameManager.Instance == null) return;
-
-            foreach (var item in GameManager.Instance.playerItems)
-            {
-                var itemObj = Instantiate(inventoryItemPrefab, inventoryGrid);
-                var itemUI = itemObj.GetComponent<InventoryItemUI>();
-                if (itemUI != null)
-                {
-                    Debug.Log($"[InventoryItemUI] Setting up item: {item}");
-                    itemUI.Setup(item);
-                }
-                    
-            }
+            if (inventoryView != null)
+                inventoryView.PopulateFromGameManager();
         }
 
         private void OnBackToSelection()

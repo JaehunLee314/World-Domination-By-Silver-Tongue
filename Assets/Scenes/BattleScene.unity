@@ -779,6 +779,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 360327308}
     - target: {fileID: 7758000803716241443, guid: 72ecf746af1ea42f8b576cd0a6077ccd, type: 3}
+      propertyPath: inventoryView
+      value: 
+      objectReference: {fileID: 1301252918}
+    - target: {fileID: 7758000803716241443, guid: 72ecf746af1ea42f8b576cd0a6077ccd, type: 3}
       propertyPath: opponentImage
       value: 
       objectReference: {fileID: 360327313}
@@ -881,7 +885,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6876162629940000528, guid: 72ecf746af1ea42f8b576cd0a6077ccd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1301252918}
   m_SourcePrefab: {fileID: 100100000, guid: 72ecf746af1ea42f8b576cd0a6077ccd, type: 3}
 --- !u!114 &360327306 stripped
 MonoBehaviour:
@@ -1825,6 +1832,25 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3495853313163161504, guid: d77e014deab50402693e49bb85d18e1d, type: 3}
   m_PrefabInstance: {fileID: 729956689}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1301252915 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6876162629940000528, guid: 72ecf746af1ea42f8b576cd0a6077ccd, type: 3}
+  m_PrefabInstance: {fileID: 360327305}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1301252918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1301252915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e881ea7ffdbec4c7f981fbdd654f2c14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.BattleScene.InventoryView
+  inventoryGrid: {fileID: 360327308}
+  inventoryItemPrefab: {fileID: 4837304485827841876, guid: d4fd9898e03b348cbb6ca95deed4d88b, type: 3}
 --- !u!1001 &1360625193
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2187,17 +2213,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.GameManager
   availableCharacters:
   - {fileID: 11400000, guid: 87e8349f793194d25b3a19a583765f9b, type: 2}
-  - {fileID: 11400000, guid: 560e9c94009ad4a0c99b13d33eb8924f, type: 2}
   - {fileID: 11400000, guid: a7992dfbeba574b089df36c0a4cdcae2, type: 2}
+  - {fileID: 11400000, guid: 560e9c94009ad4a0c99b13d33eb8924f, type: 2}
   playerItems:
-  - {fileID: 11400000, guid: b5a361948304845f1a1ae871294c86f3, type: 2}
-  - {fileID: 11400000, guid: 728312946a6ab4fe7a695a2f770f6ccd, type: 2}
+  - {fileID: 11400000, guid: 265135cfdce86463a94f285a2ab80d59, type: 2}
+  - {fileID: 11400000, guid: e38821de734d74561a3cb12ce075cdbc, type: 2}
+  - {fileID: 11400000, guid: 88feced46684a474caec13f388983f95, type: 2}
   - {fileID: 11400000, guid: 9383162dd2e414003b06333e78b12b28, type: 2}
   - {fileID: 11400000, guid: 358dac6d1444f41ed84c624724595c91, type: 2}
-  - {fileID: 11400000, guid: 88feced46684a474caec13f388983f95, type: 2}
-  - {fileID: 11400000, guid: 265135cfdce86463a94f285a2ab80d59, type: 2}
+  - {fileID: 11400000, guid: b5a361948304845f1a1ae871294c86f3, type: 2}
+  - {fileID: 11400000, guid: 728312946a6ab4fe7a695a2f770f6ccd, type: 2}
   selectedBattler: {fileID: 0}
-  currentOpponent: {fileID: 0}
+  currentOpponent: {fileID: 11400000, guid: a7992dfbeba574b089df36c0a4cdcae2, type: 2}
   maxTurns: 7
 --- !u!4 &1673018156
 Transform:
