@@ -56,9 +56,13 @@ namespace SilverTongue.BattleScene
         private Vector2 _opponentPanelOrigAnchorMin;
         private Vector2 _opponentPanelOrigAnchorMax;
 
-        // Center anchors for "speaking" position
-        private static readonly Vector2 CenterAnchorMin = new Vector2(0.25f, 0.1f);
-        private static readonly Vector2 CenterAnchorMax = new Vector2(0.55f, 0.95f);
+        // "Step forward" anchor positions (computed from originals, only X shifts)
+        private Vector2 _playerForwardAnchorMin;
+        private Vector2 _playerForwardAnchorMax;
+        private Vector2 _opponentForwardAnchorMin;
+        private Vector2 _opponentForwardAnchorMax;
+
+        private const float StepForwardAmount = 0.10f;
 
         public void Initialize(BattleSceneManager manager)
         {
@@ -103,11 +107,17 @@ namespace SilverTongue.BattleScene
             {
                 _playerPanelOrigAnchorMin = playerPanel.anchorMin;
                 _playerPanelOrigAnchorMax = playerPanel.anchorMax;
+                // Step forward = shift X right, keep Y
+                _playerForwardAnchorMin = new Vector2(_playerPanelOrigAnchorMin.x + StepForwardAmount, _playerPanelOrigAnchorMin.y);
+                _playerForwardAnchorMax = new Vector2(_playerPanelOrigAnchorMax.x + StepForwardAmount, _playerPanelOrigAnchorMax.y);
             }
             if (opponentPanel != null)
             {
                 _opponentPanelOrigAnchorMin = opponentPanel.anchorMin;
                 _opponentPanelOrigAnchorMax = opponentPanel.anchorMax;
+                // Step forward = shift X left, keep Y
+                _opponentForwardAnchorMin = new Vector2(_opponentPanelOrigAnchorMin.x - StepForwardAmount, _opponentPanelOrigAnchorMin.y);
+                _opponentForwardAnchorMax = new Vector2(_opponentPanelOrigAnchorMax.x - StepForwardAmount, _opponentPanelOrigAnchorMax.y);
             }
         }
 
@@ -230,12 +240,12 @@ namespace SilverTongue.BattleScene
             panel.offsetMax = Vector2.zero;
         }
 
-        private async System.Threading.Tasks.Task MovePanelToCenterAsync(bool isPlayer)
+        private async System.Threading.Tasks.Task MovePanelForwardAsync(bool isPlayer)
         {
             if (isPlayer && playerPanel != null)
-                await SmoothMovePanelAsync(playerPanel, CenterAnchorMin, CenterAnchorMax, panelMoveDuration);
+                await SmoothMovePanelAsync(playerPanel, _playerForwardAnchorMin, _playerForwardAnchorMax, panelMoveDuration);
             else if (!isPlayer && opponentPanel != null)
-                await SmoothMovePanelAsync(opponentPanel, CenterAnchorMin, CenterAnchorMax, panelMoveDuration);
+                await SmoothMovePanelAsync(opponentPanel, _opponentForwardAnchorMin, _opponentForwardAnchorMax, panelMoveDuration);
         }
 
         private async System.Threading.Tasks.Task MovePanelBackAsync(bool isPlayer)
@@ -359,7 +369,7 @@ namespace SilverTongue.BattleScene
             };
 
             SetSpeaker(false);
-            await MovePanelToCenterAsync(false);
+            await MovePanelForwardAsync(false);
             if (!_isBattleActive) return;
 
             ShowThinking(_manager.Opponent.characterName);
@@ -401,7 +411,7 @@ namespace SilverTongue.BattleScene
             {
                 // ── Player's turn ──
                 SetSpeaker(true);
-                await MovePanelToCenterAsync(true);
+                await MovePanelForwardAsync(true);
                 if (!_isBattleActive) return;
 
                 ShowThinking(_manager.SelectedBattler.characterName);
@@ -445,7 +455,7 @@ namespace SilverTongue.BattleScene
 
                 // ── Opponent's turn ──
                 SetSpeaker(false);
-                await MovePanelToCenterAsync(false);
+                await MovePanelForwardAsync(false);
                 if (!_isBattleActive) return;
 
                 ShowThinking(_manager.Opponent.characterName);

@@ -146,7 +146,7 @@ public class BattleUIBuilder
         // Vertical layout
         var vlg = root.AddComponent<VerticalLayoutGroup>();
         vlg.padding = new RectOffset(15, 15, 15, 15);
-        vlg.spacing = 24;
+        vlg.spacing = 10;
         vlg.childAlignment = TextAnchor.UpperCenter;
         vlg.childControlWidth = true;
         vlg.childControlHeight = false;
@@ -668,7 +668,8 @@ public class BattleUIBuilder
         var playerImgObj = CreateUIObject("PlayerCharacterImage", playerPanel.transform);
         var playerImgRt = playerImgObj.GetComponent<RectTransform>();
         SetAnchors(playerImgRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
-        playerImgRt.sizeDelta = new Vector2(500, 500);
+        playerImgRt.sizeDelta = new Vector2(1000, 1000);
+        playerImgRt.localPosition = new Vector3(0, -215, 0); // Lower the player image a bit
         playerImgObj.AddComponent<Image>().color = new Color(0.3f, 0.3f, 0.3f, 1f);
 
         var playerNameObj = CreateUIObject("PlayerNameLabel", playerPanel.transform);
@@ -688,7 +689,8 @@ public class BattleUIBuilder
         var oppImgObj = CreateUIObject("OpponentCharacterImage", oppPanel.transform);
         var oppImgRt = oppImgObj.GetComponent<RectTransform>();
         SetAnchors(oppImgRt, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
-        oppImgRt.sizeDelta = new Vector2(500, 500);
+        oppImgRt.sizeDelta = new Vector2(1000, 1000);
+        oppImgRt.localPosition = new Vector3(0, -215, 0); // Lower the opponent image a bit
         oppImgObj.AddComponent<Image>().color = new Color(0.5f, 0.3f, 0.3f, 1f);
 
         var oppNameObj = CreateUIObject("OpponentNameLabel", oppPanel.transform);
