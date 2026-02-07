@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Boss_DemonKing
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.CharacterSO
   characterName: Demon King Zarvoth
-  profileImage: {fileID: 0}
+  profileImage: {fileID: 21300000, guid: d8225082fae5c4cff81354e398f7da3d, type: 3}
   personality: Dramatic, grandiose, secretly insecure about his cooking
   intelligence: 6
   systemPromptLore: You are Zarvoth, the self-proclaimed Demon King who conquered

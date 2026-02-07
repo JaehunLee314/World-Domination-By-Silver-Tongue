@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Rival_Reina
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.CharacterSO
   characterName: Reina
-  profileImage: {fileID: 0}
+  profileImage: {fileID: 21300000, guid: 7d889ddf45f5044218f6b0451cba4127, type: 3}
   personality: Cold, calculating, secretly lonely
   intelligence: 9
   systemPromptLore: You are Reina, a genius strategist who hides behind a mask of
