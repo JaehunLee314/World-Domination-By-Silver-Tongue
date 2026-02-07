@@ -2,23 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using SilverTongue.Data;
 using SilverTongue.LLM;
+using SilverTongue.BattleSystem;
 
 namespace SilverTongue.BattleScene
 {
-    public enum BattlePhase
-    {
-        BattlerSelecting,
-        StrategySelecting,
-        Battle,
-        BattleResult
-    }
-
-    public struct StrategyEntry
-    {
-        public string StrategyText;
-        public List<ItemSO> Items;
-    }
-
     public class BattleSceneManager : MonoBehaviour
     {
         [Header("Canvas References")]
@@ -40,28 +27,32 @@ namespace SilverTongue.BattleScene
         [Header("Battle Config")]
         [SerializeField] private CharacterSO opponent;
         [SerializeField] private int maxTurns = 7;
-        [SerializeField] private bool useMockLLM = true;
+        [SerializeField] private int opponentMaxSanity = 100;
+        [SerializeField] private bool useMockLLM = false;
 
         private BattlePhase _currentPhase;
         private ILLMService _llmService;
-        private int _currentTurn;
         private bool _isPausedFromBattle;
-        private readonly List<ConversationEntry> _conversationHistory = new List<ConversationEntry>();
-        private StrategyEntry _strategy;
+        private readonly BattleState _state = new BattleState();
 
+        public BattleState State => _state;
         public CharacterSO SelectedBattler { get; private set; }
         public CharacterSO Opponent => opponent;
-        public int CurrentTurn => _currentTurn;
-        public int MaxTurns => maxTurns;
+        public int CurrentTurn => _state.CurrentTurn;
+        public int MaxTurns => _state.MaxTurns;
+        public int OpponentMaxSanity => _state.OpponentMaxSanity;
+        public int OpponentCurrentSanity => _state.OpponentCurrentSanity;
         public ILLMService LLMService => _llmService;
         public bool IsPausedFromBattle => _isPausedFromBattle;
-        public IReadOnlyList<ConversationEntry> ConversationHistory => _conversationHistory;
-        public StrategyEntry Strategy => _strategy;
+        public IReadOnlyList<ConversationEntry> ConversationHistory => _state.ConversationHistory;
+        public StrategyEntry Strategy => _state.Strategy;
+        public JudgeResult LastJudgeResult => _state.LastJudgeResult;
 
-        public void SetStrategy(StrategyEntry strategy)
-        {
-            _strategy = strategy;
-        }
+        public void SetStrategy(StrategyEntry strategy) => _state.SetStrategy(strategy);
+        public int ApplyDamage(int damage) => _state.ApplyDamage(damage);
+        public void SetLastJudgeResult(JudgeResult result) => _state.SetLastJudgeResult(result);
+        public void AdvanceTurn() => _state.AdvanceTurn();
+        public void AddConversationEntry(ConversationEntry entry) => _state.AddConversationEntry(entry);
 
         private void Start()
         {
@@ -71,6 +62,8 @@ namespace SilverTongue.BattleScene
             // otherwise fall back to serialized field (standalone testing)
             if (GameManager.Instance != null && GameManager.Instance.currentOpponent != null)
                 opponent = GameManager.Instance.currentOpponent;
+
+            _state.Reset(maxTurns, opponentMaxSanity);
 
             if (conversationHistoryCanvas != null)
                 conversationHistoryCanvas.SetActive(false);
@@ -106,14 +99,13 @@ namespace SilverTongue.BattleScene
                     battlerSelectingView.Initialize(this);
                     break;
                 case BattlePhase.StrategySelecting:
-                    _currentTurn = 1;
                     strategySelectingView.Initialize(this);
                     break;
                 case BattlePhase.Battle:
                     battleView.Initialize(this);
                     break;
                 case BattlePhase.BattleResult:
-                    battleResultView.Initialize(this, _currentTurn > maxTurns);
+                    battleResultView.Initialize(this, _state.OpponentCurrentSanity <= 0);
                     break;
             }
         }
@@ -134,22 +126,13 @@ namespace SilverTongue.BattleScene
             SwitchPhase(BattlePhase.BattleResult);
         }
 
-        public void AdvanceTurn()
-        {
-            _currentTurn++;
-        }
-
         public void ReturnToBattlerSelection()
         {
+            _state.Reset(maxTurns, opponentMaxSanity);
             SwitchPhase(BattlePhase.BattlerSelecting);
         }
 
         // ─── Conversation History ────────────────────────────────────────
-
-        public void AddConversationEntry(ConversationEntry entry)
-        {
-            _conversationHistory.Add(entry);
-        }
 
         public void ShowConversationHistory()
         {

@@ -10,14 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 046af0c82335e4e8e8596357d89e7423, type: 3}
-  m_Name: Evidence_PhotoAlbum
+  m_Name: Item_OldManual
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
-  itemId: ev_photo
-  itemName: Photo Album
+  itemId: manual
+  itemName: 1998 Old Manual
   itemImage: {fileID: 0}
-  itemType: 0
-  description: A photo album showing the opponent as a child, happily playing with
-    friends at a festival. Proof they once valued friendship.
-  skillName: 
-  promptModifier: 
-  thinkingEffort: 1
+  description: A dusty maintenance manual from 1998. Proves the train uses analog
+    vacuum tubes.
+  factInjection: '[ITEM: Old Maintenance Manual] FACT: A dusty manual. States the
+    train was built in 1998 using analog vacuum tubes. Cannot support 5G.'

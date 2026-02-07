@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using SilverTongue.Data;
+using SilverTongue.BattleSystem;
 
 namespace SilverTongue.BattleScene
 {

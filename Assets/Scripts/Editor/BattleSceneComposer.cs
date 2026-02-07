@@ -24,27 +24,35 @@ public class BattleSceneComposer
             gm = gmObj.AddComponent<SilverTongue.GameManager>();
 
         // Load character SOs
-        var kai = AssetDatabase.LoadAssetAtPath<CharacterSO>("Assets/ScriptableObjects/Characters/Protagonist_Kai.asset");
-        var reina = AssetDatabase.LoadAssetAtPath<CharacterSO>("Assets/ScriptableObjects/Characters/Rival_Reina.asset");
-        var zarvoth = AssetDatabase.LoadAssetAtPath<CharacterSO>("Assets/ScriptableObjects/Characters/Boss_DemonKing.asset");
+        var kenta = AssetDatabase.LoadAssetAtPath<CharacterSO>("Assets/ScriptableObjects/Characters/Protagonist_Kenta.asset");
+        var prophet = AssetDatabase.LoadAssetAtPath<CharacterSO>("Assets/ScriptableObjects/Characters/Opponent_Prophet.asset");
+        var testChar = AssetDatabase.LoadAssetAtPath<CharacterSO>("Assets/ScriptableObjects/Characters/TestChar_1.asset");
 
         var so = new SerializedObject(gm);
         var charProp = so.FindProperty("availableCharacters");
         charProp.arraySize = 3;
-        charProp.GetArrayElementAtIndex(0).objectReferenceValue = kai;
-        charProp.GetArrayElementAtIndex(1).objectReferenceValue = reina;
-        charProp.GetArrayElementAtIndex(2).objectReferenceValue = zarvoth;
+        charProp.GetArrayElementAtIndex(0).objectReferenceValue = kenta;
+        charProp.GetArrayElementAtIndex(1).objectReferenceValue = testChar;
+        charProp.GetArrayElementAtIndex(2).objectReferenceValue = prophet;
 
-        // Load item SOs (evidence only, no skill items)
-        var diary = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Evidence_SecretDiary.asset");
-        var photo = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Evidence_PhotoAlbum.asset");
-        var ramen = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Evidence_RamenRecipe.asset");
+        // Load item SOs (all 7 evidence items from spec)
+        var manual = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Item_OldManual.asset");
+        var radio = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Item_PortableRadio.asset");
+        var report = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Item_FailedReport.asset");
+        var momLetter = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Item_MomsLetter.asset");
+        var dismissal = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Item_DismissalNotice.asset");
+        var smartphone = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Item_5GSmartphone.asset");
+        var coupon = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Item_500wonCoupon.asset");
 
         var itemsProp = so.FindProperty("playerItems");
-        itemsProp.arraySize = 3;
-        itemsProp.GetArrayElementAtIndex(0).objectReferenceValue = diary;
-        itemsProp.GetArrayElementAtIndex(1).objectReferenceValue = photo;
-        itemsProp.GetArrayElementAtIndex(2).objectReferenceValue = ramen;
+        itemsProp.arraySize = 7;
+        itemsProp.GetArrayElementAtIndex(0).objectReferenceValue = manual;
+        itemsProp.GetArrayElementAtIndex(1).objectReferenceValue = radio;
+        itemsProp.GetArrayElementAtIndex(2).objectReferenceValue = report;
+        itemsProp.GetArrayElementAtIndex(3).objectReferenceValue = momLetter;
+        itemsProp.GetArrayElementAtIndex(4).objectReferenceValue = dismissal;
+        itemsProp.GetArrayElementAtIndex(5).objectReferenceValue = smartphone;
+        itemsProp.GetArrayElementAtIndex(6).objectReferenceValue = coupon;
         so.ApplyModifiedProperties();
 
         // === 2. Instantiate Canvas Prefabs ===
@@ -104,10 +112,10 @@ public class BattleSceneComposer
             bsmSo.FindProperty("conversationHistoryView").objectReferenceValue = conversationHistoryObj.GetComponent<ConversationHistoryView>();
         }
 
-        // Set opponent (default to Demon King)
-        bsmSo.FindProperty("opponent").objectReferenceValue = zarvoth;
+        // Set opponent (default to Prophet)
+        bsmSo.FindProperty("opponent").objectReferenceValue = prophet;
         bsmSo.FindProperty("maxTurns").intValue = 7;
-        bsmSo.FindProperty("useMockLLM").boolValue = true;
+        bsmSo.FindProperty("useMockLLM").boolValue = false;
 
         bsmSo.ApplyModifiedProperties();
 
@@ -249,6 +257,10 @@ public class BattleSceneComposer
         so.FindProperty("dialogueText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/DialogueText");
         so.FindProperty("thoughtText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/ThoughtText");
         so.FindProperty("dialogueAreaButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/DialogueArea");
+
+        // Sanity bar
+        so.FindProperty("sanityBarFill").objectReferenceValue = FindInChildren<Image>(root, "Canvas/TopUI/SanityBarBg/SanityBarFill");
+        so.FindProperty("sanityText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/TopUI/SanityBarBg/SanityText");
 
         so.ApplyModifiedProperties();
         Debug.Log("[BattleSceneComposer] Wired BattleView");

@@ -10,14 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 046af0c82335e4e8e8596357d89e7423, type: 3}
-  m_Name: Evidence_RamenRecipe
+  m_Name: Item_FailedReport
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
-  itemId: ev_ramen
-  itemName: Secret Ramen Recipe
+  itemId: inspection_report
+  itemName: Failed Safety Report
   itemImage: {fileID: 0}
-  itemType: 0
-  description: A meticulously handwritten ramen recipe found in the Demon King's
-    personal vault. The margins are full of flavor notes and heart doodles.
-  skillName: 
-  promptModifier: 
-  thinkingEffort: 1
+  description: Official document proving safety checks failed due to budget cuts,
+    not a conspiracy.
+  factInjection: '[ITEM: Failed Report] FACT: Document proves safety checks failed
+    due to budget cuts, not a conspiracy.'

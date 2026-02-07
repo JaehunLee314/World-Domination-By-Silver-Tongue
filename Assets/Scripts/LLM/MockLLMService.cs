@@ -24,20 +24,32 @@ namespace SilverTongue.LLM
             "I... I don't need your pity. But perhaps... a temporary ceasefire wouldn't be the worst idea."
         };
 
+        // Alternating judge results to demonstrate different damage types
+        private readonly List<string> _judgeResponses = new List<string>
+        {
+            "{\"reasoning\": \"The player presented a logical argument backed by evidence from the diary. The opponent was visibly shaken.\", \"damage_type\": \"Normal Hit\", \"damage_dealt\": 20, \"prophet_current_sanity\": 80, \"status\": \"ONGOING\"}",
+            "{\"reasoning\": \"The player used the photo album as emotional leverage. Critical strike — the opponent's composure cracked.\", \"damage_type\": \"Critical Hit\", \"damage_dealt\": 50, \"prophet_current_sanity\": 30, \"status\": \"ONGOING\"}",
+            "{\"reasoning\": \"The player's argument lacked evidence. Just empty rhetoric.\", \"damage_type\": \"Ineffective\", \"damage_dealt\": 0, \"prophet_current_sanity\": 30, \"status\": \"ONGOING\"}",
+            "{\"reasoning\": \"The ramen evidence struck a deep chord. The opponent's defenses are crumbling.\", \"damage_type\": \"Normal Hit\", \"damage_dealt\": 20, \"prophet_current_sanity\": 10, \"status\": \"ONGOING\"}",
+            "{\"reasoning\": \"The final appeal broke through. The opponent can no longer maintain their stance.\", \"damage_type\": \"Critical Hit\", \"damage_dealt\": 50, \"prophet_current_sanity\": 0, \"status\": \"KENTA_WINS\"}"
+        };
+
         private int _playerIndex;
         private int _opponentIndex;
+        private int _judgeIndex;
 
         public async Task<LLMResponse> GenerateResponseAsync(LLMRequest request)
         {
             await Task.Delay(Random.Range(500, 1500));
 
             bool isPlayerSide = request.SystemPrompt != null && request.SystemPrompt.Contains("skilled debater");
-            bool isJudge = request.SystemPrompt != null && request.SystemPrompt.Contains("impartial judge");
+            bool isJudge = request.SystemPrompt != null && request.SystemPrompt.Contains("Game Engine & Referee");
 
             string mockContent;
             if (isJudge)
             {
-                mockContent = "DRAW";
+                mockContent = _judgeResponses[_judgeIndex % _judgeResponses.Count];
+                _judgeIndex++;
             }
             else if (isPlayerSide)
             {

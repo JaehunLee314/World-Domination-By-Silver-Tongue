@@ -18,11 +18,14 @@ namespace SilverTongue.BattleScene
             _manager = manager;
 
             resultText.text = playerWon ? "WIN" : "LOSE";
-            resultText.color = playerWon ? Color.yellow : Color.red;
+            resultText.color = playerWon
+                ? new Color(0.973f, 0.961f, 0.275f) // Accent yellow
+                : Color.red;
 
+            string opponentName = manager.Opponent != null ? manager.Opponent.characterName : "OPPONENT";
             resultDescriptionText.text = playerWon
-                ? "Your words reached their heart! A new nakama has been gained!"
-                : "Your persuasion was not enough this time. Better luck next round.";
+                ? $"CONFIRMED: {opponentName} BROKEN"
+                : "CONTRACT SIGNED: YOU LOSE";
 
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseClicked);

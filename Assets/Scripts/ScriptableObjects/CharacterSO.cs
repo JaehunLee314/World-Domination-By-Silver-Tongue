@@ -32,6 +32,8 @@ namespace SilverTongue.Data
         public string personality;
         [Range(1, 10)]
         public int intelligence = 5;
+        [Tooltip("Controls LLM token limit: Low (Mob), Medium (Elite), High (Boss)")]
+        public ThinkingEffort thinkingEffort = ThinkingEffort.Medium;
 
         [Header("Skills")]
         public SkillData[] skills;

@@ -11,5 +11,10 @@ namespace SilverTongue.Data
         public Sprite itemImage;
         [TextArea(2, 5)]
         public string description;
+
+        [Header("Battle Injection")]
+        [Tooltip("Text injected into LLM context when equipped. e.g. [ITEM: Name] FACT: ...")]
+        [TextArea(2, 5)]
+        public string factInjection;
     }
 }

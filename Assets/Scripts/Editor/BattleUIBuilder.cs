@@ -654,6 +654,30 @@ public class BattleUIBuilder
         logBtnBRt.anchoredPosition = new Vector2(15, 0);
         logBtnBRt.sizeDelta = new Vector2(80, 35);
 
+        // Sanity bar (right side of TopUI)
+        var sanityBarBg = CreateUIObject("SanityBarBg", topUI.transform);
+        var sanityBarBgRt = sanityBarBg.GetComponent<RectTransform>();
+        SetAnchors(sanityBarBgRt, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(1, 0.5f));
+        sanityBarBgRt.anchoredPosition = new Vector2(-15, 0);
+        sanityBarBgRt.sizeDelta = new Vector2(200, 25);
+        sanityBarBg.AddComponent<Image>().color = new Color(DarkBg.r, DarkBg.g, DarkBg.b, 0.8f);
+
+        var sanityBarFill = CreateUIObject("SanityBarFill", sanityBarBg.transform);
+        var sanityFillRt = sanityBarFill.GetComponent<RectTransform>();
+        sanityFillRt.anchorMin = Vector2.zero;
+        sanityFillRt.anchorMax = Vector2.one;
+        sanityFillRt.offsetMin = Vector2.zero;
+        sanityFillRt.offsetMax = Vector2.zero;
+        sanityFillRt.pivot = new Vector2(0, 0.5f);
+        var sanityFillImg = sanityBarFill.AddComponent<Image>();
+        sanityFillImg.color = Color.green;
+        sanityFillImg.type = Image.Type.Filled;
+        sanityFillImg.fillMethod = Image.FillMethod.Horizontal;
+
+        var sanityTextObj = CreateUIObject("SanityText", sanityBarBg.transform);
+        StretchFill(sanityTextObj.GetComponent<RectTransform>());
+        AddTMP(sanityTextObj, "Sanity: 100/100", 14, TextAlignmentOptions.Center, LightText);
+
         // === STAGE AREA (middle 55%) ===
         var stageArea = CreateUIObject("StageArea", canvas);
         var stageRt = stageArea.GetComponent<RectTransform>();

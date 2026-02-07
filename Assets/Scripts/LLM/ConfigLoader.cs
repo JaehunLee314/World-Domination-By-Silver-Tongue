@@ -14,22 +14,32 @@ public static class ConfigLoader
     {
         _config = new Dictionary<string, string>();
         
-        // Try multiple locations for .env file
+        // Project root = one level above Application.dataPath (which points to Assets/)
+        string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+
         string[] possiblePaths = new[]
         {
-            Path.Combine(Application.dataPath, "..", ".env"),
+            Path.Combine(projectRoot, ".env"),
             Path.Combine(Application.dataPath, ".env"),
             Path.Combine(Application.persistentDataPath, ".env")
         };
 
+        bool found = false;
         foreach (var path in possiblePaths)
         {
-            if (File.Exists(path))
+            string fullPath = Path.GetFullPath(path);
+            if (File.Exists(fullPath))
             {
-                ParseEnvFile(path);
-                Debug.Log($"[ConfigLoader] Loaded config from: {path}");
+                ParseEnvFile(fullPath);
+                Debug.Log($"[ConfigLoader] Loaded config from: {fullPath}");
+                found = true;
                 break;
             }
+        }
+
+        if (!found)
+        {
+            Debug.LogWarning($"[ConfigLoader] No .env file found. Searched: {string.Join(", ", possiblePaths)}");
         }
 
         _loaded = true;

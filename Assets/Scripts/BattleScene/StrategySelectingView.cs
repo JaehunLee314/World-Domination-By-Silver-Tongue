@@ -108,7 +108,11 @@ namespace SilverTongue.BattleScene
                 var itemObj = Instantiate(inventoryItemPrefab, inventoryGrid);
                 var itemUI = itemObj.GetComponent<InventoryItemUI>();
                 if (itemUI != null)
+                {
+                    Debug.Log($"[InventoryItemUI] Setting up item: {item}");
                     itemUI.Setup(item);
+                }
+                    
             }
         }
 
