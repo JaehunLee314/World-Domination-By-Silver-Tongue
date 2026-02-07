@@ -6,10 +6,10 @@ using SilverTongue.BattleScene;
 
 public class AgendaSlotWirer
 {
-    [MenuItem("Tools/Wire Agenda Slots")]
-    public static void WireAgendaSlots()
+    [MenuItem("Tools/Wire Strategy Panel")]
+    public static void WireStrategyPanel()
     {
-        // Wire agenda slots in the scene
+        // Wire strategy panel in the scene
         var strategyObj = GameObject.Find("StrategySelectingCanvas");
         if (strategyObj == null)
         {
@@ -17,50 +17,26 @@ public class AgendaSlotWirer
             return;
         }
 
-        for (int i = 1; i <= 3; i++)
+        // Wire StrategyPanelUI
+        var panelTransform = strategyObj.transform.Find("Canvas/BottomSection/StrategyPanel");
+        if (panelTransform != null)
         {
-            var slotTransform = strategyObj.transform.Find($"Canvas/BottomSection/AgendaPanel/AgendaSlot{i}");
-            if (slotTransform == null)
+            var panel = panelTransform.GetComponent<StrategyPanelUI>();
+            if (panel != null)
             {
-                Debug.LogWarning($"[AgendaSlotWirer] AgendaSlot{i} not found");
-                continue;
+                var panelSo = new SerializedObject(panel);
+                panelSo.FindProperty("strategyTextField").objectReferenceValue = panelTransform.Find("StrategyTextField")?.GetComponent<TMP_InputField>();
+                panelSo.FindProperty("itemSlotsContainer").objectReferenceValue = panelTransform.Find("ItemSlotsContainer");
+                panelSo.ApplyModifiedProperties();
+                Debug.Log("[AgendaSlotWirer] Wired StrategyPanelUI");
             }
-
-            var slot = slotTransform.GetComponent<AgendaSlotUI>();
-            if (slot == null) continue;
-
-            var so = new SerializedObject(slot);
-
-            so.FindProperty("slotNumberText").objectReferenceValue = slotTransform.Find("SlotNumberText")?.GetComponent<TextMeshProUGUI>();
-            so.FindProperty("pointTextField").objectReferenceValue = slotTransform.Find("PointTextField")?.GetComponent<TMP_InputField>();
-            so.FindProperty("skillSlotImage").objectReferenceValue = slotTransform.Find("SkillSlot/SkillSlotImage")?.GetComponent<Image>();
-            so.FindProperty("itemSlotImage").objectReferenceValue = slotTransform.Find("ItemSlot/ItemSlotImage")?.GetComponent<Image>();
-            so.FindProperty("skillSlotLabel").objectReferenceValue = slotTransform.Find("SkillSlot/SkillSlotLabel")?.GetComponent<TextMeshProUGUI>();
-            so.FindProperty("itemSlotLabel").objectReferenceValue = slotTransform.Find("ItemSlot/ItemSlotLabel")?.GetComponent<TextMeshProUGUI>();
-
-            so.ApplyModifiedProperties();
-
-            // Wire DropTarget slotType on skill and item slots
-            var skillSlotDt = slotTransform.Find("SkillSlot")?.GetComponent<DropTarget>();
-            if (skillSlotDt != null)
-            {
-                var dtSo = new SerializedObject(skillSlotDt);
-                dtSo.FindProperty("slotType").enumValueIndex = 0; // DropSlotType.Skill
-                dtSo.ApplyModifiedProperties();
-            }
-
-            var itemSlotDt = slotTransform.Find("ItemSlot")?.GetComponent<DropTarget>();
-            if (itemSlotDt != null)
-            {
-                var dtSo = new SerializedObject(itemSlotDt);
-                dtSo.FindProperty("slotType").enumValueIndex = 1; // DropSlotType.Item
-                dtSo.ApplyModifiedProperties();
-            }
-
-            Debug.Log($"[AgendaSlotWirer] Wired AgendaSlot{i}");
+        }
+        else
+        {
+            Debug.LogWarning("[AgendaSlotWirer] StrategyPanel not found");
         }
 
-        // Also wire the CharacterCard prefab's serialized fields
+        // Wire the CharacterCard prefab's serialized fields
         string cardPath = "Assets/Prefabs/BattleScene/UI/CharacterCard.prefab";
         var cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(cardPath);
         if (cardPrefab != null)
@@ -73,6 +49,7 @@ public class AgendaSlotWirer
                 cardSo.FindProperty("nameText").objectReferenceValue = cardPrefab.transform.Find("NameText")?.GetComponent<TextMeshProUGUI>();
                 cardSo.FindProperty("personalityText").objectReferenceValue = cardPrefab.transform.Find("PersonalityText")?.GetComponent<TextMeshProUGUI>();
                 cardSo.FindProperty("intelligenceText").objectReferenceValue = cardPrefab.transform.Find("IntelligenceText")?.GetComponent<TextMeshProUGUI>();
+                cardSo.FindProperty("skillsText").objectReferenceValue = cardPrefab.transform.Find("SkillsText")?.GetComponent<TextMeshProUGUI>();
                 cardSo.FindProperty("loseConditionsText").objectReferenceValue = cardPrefab.transform.Find("LoseConditionsText")?.GetComponent<TextMeshProUGUI>();
                 cardSo.FindProperty("selectButton").objectReferenceValue = cardPrefab.transform.Find("SelectButton")?.GetComponent<Button>();
                 cardSo.ApplyModifiedProperties();
@@ -123,6 +100,6 @@ public class AgendaSlotWirer
         UnityEditor.SceneManagement.EditorSceneManager.SaveScene(activeScene);
         AssetDatabase.SaveAssets();
 
-        Debug.Log("[AgendaSlotWirer] All slots and prefabs wired successfully!");
+        Debug.Log("[AgendaSlotWirer] All panels and prefabs wired successfully!");
     }
 }

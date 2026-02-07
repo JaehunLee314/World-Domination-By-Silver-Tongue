@@ -10,7 +10,7 @@ namespace SilverTongue.LLM
         {
             "[Thought Process] Appeal to their emotional side.\nI've seen your diary. You wrote about wanting friends — that's not weakness, that's courage. <evidence_used=ev_diary>",
             "[Thought Process] Using logical deduction.\nYour own actions contradict your words. You say you don't care, but the photo album tells a different story. <evidence_used=ev_photo>",
-            "[Thought Process] Applying tsundere logic.\nI-it's not like I want to be your friend or anything! But... if you happened to stop being evil, I wouldn't hate it. <skill_used=sk_tsundere>",
+            "[Thought Process] Trying a softer approach.\nI-it's not like I want to be your friend or anything! But... if you happened to stop being evil, I wouldn't hate it.",
             "[Thought Process] Appealing to hidden passion.\nThat ramen recipe in your vault? The one with the heart doodles? A true conqueror doesn't need to hide what they love. <evidence_used=ev_ramen>",
             "[Thought Process] Final emotional appeal.\nEveryone deserves a second chance. You've been fighting alone for so long — but you don't have to anymore."
         };

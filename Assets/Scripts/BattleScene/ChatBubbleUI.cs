@@ -28,17 +28,11 @@ namespace SilverTongue.BattleScene
                 ? new Color(0.2f, 0.4f, 0.6f, 0.9f)
                 : new Color(0.5f, 0.2f, 0.2f, 0.9f);
 
-            bool hasIndicator = !string.IsNullOrEmpty(entry.EvidenceUsed)
-                             || !string.IsNullOrEmpty(entry.SkillUsed);
+            bool hasIndicator = !string.IsNullOrEmpty(entry.EvidenceUsed);
             indicatorContainer.SetActive(hasIndicator);
             if (hasIndicator)
             {
-                string indicators = "";
-                if (!string.IsNullOrEmpty(entry.EvidenceUsed))
-                    indicators += $"[Evidence: {entry.EvidenceUsed}] ";
-                if (!string.IsNullOrEmpty(entry.SkillUsed))
-                    indicators += $"[Skill: {entry.SkillUsed}]";
-                indicatorText.text = indicators.Trim();
+                indicatorText.text = $"[Evidence: {entry.EvidenceUsed}]";
             }
         }
     }

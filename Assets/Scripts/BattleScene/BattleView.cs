@@ -42,7 +42,7 @@ namespace SilverTongue.BattleScene
         private BattleSceneManager _manager;
         private bool _isAutoProgress;
         private bool _isBattleActive;
-        private bool _waitingForInput; // true when auto-progress is off and waiting for player click
+        private bool _waitingForInput;
 
         // Cumulative LLM conversation histories (mirrored perspectives)
         private List<LLMMessage> _playerHistory = new List<LLMMessage>();
@@ -90,7 +90,7 @@ namespace SilverTongue.BattleScene
             UpdateTurnTracker();
             UpdateAutoProgressUI();
 
-            // Rebuild player prompt in case agenda changed during pause
+            // Rebuild player prompt in case strategy changed during pause
             _playerSystemPrompt = BuildPlayerSystemPrompt();
             ContinueAutoBattle();
         }
@@ -176,15 +176,13 @@ namespace SilverTongue.BattleScene
             _isAutoProgress = !_isAutoProgress;
             UpdateAutoProgressUI();
 
-            // If turning on auto and we were waiting, unblock the existing loop
-            // (don't call ContinueAutoBattle - the existing async loop resumes naturally)
             if (_isAutoProgress && _waitingForInput)
                 _waitingForInput = false;
         }
 
         private void OnGoToStrategy()
         {
-            if (_isAutoProgress) return; // disabled during auto
+            if (_isAutoProgress) return;
             _isBattleActive = false;
             _waitingForInput = false;
             _manager.PauseToStrategy();
@@ -261,31 +259,40 @@ namespace SilverTongue.BattleScene
             sb.AppendLine($"Your speaking style: {player.voiceTone}");
             sb.AppendLine();
 
-            // Agenda from strategy phase
-            var agenda = _manager.Agenda;
-            if (agenda != null && agenda.Length > 0)
+            // Character skills
+            if (player.skills != null && player.skills.Length > 0)
             {
-                sb.AppendLine("YOUR DEBATE AGENDA:");
-                for (int i = 0; i < agenda.Length; i++)
+                sb.AppendLine("YOUR SKILLS:");
+                foreach (var skill in player.skills)
                 {
-                    var entry = agenda[i];
-                    if (string.IsNullOrWhiteSpace(entry.PointText) && entry.Skill == null && entry.Evidence == null)
-                        continue;
-
-                    sb.AppendLine($"{i + 1}. {(string.IsNullOrWhiteSpace(entry.PointText) ? "(no talking point)" : entry.PointText)}");
-                    if (entry.Skill != null)
-                        sb.AppendLine($"   [Skill: {entry.Skill.skillName} - {entry.Skill.promptModifier}]");
-                    if (entry.Evidence != null)
-                        sb.AppendLine($"   [Evidence: {entry.Evidence.itemName} (ID: {entry.Evidence.itemId}) - {entry.Evidence.description}]");
+                    sb.AppendLine($"- {skill.skillName}: {skill.description}");
+                    sb.AppendLine($"  [Technique: {skill.promptModifier}]");
                 }
+                sb.AppendLine();
+            }
+
+            // Strategy from strategy phase
+            var strategy = _manager.Strategy;
+            if (!string.IsNullOrWhiteSpace(strategy.StrategyText))
+            {
+                sb.AppendLine("YOUR STRATEGY:");
+                sb.AppendLine(strategy.StrategyText);
+                sb.AppendLine();
+            }
+
+            // Evidence items
+            if (strategy.Items != null && strategy.Items.Count > 0)
+            {
+                sb.AppendLine("YOUR EVIDENCE:");
+                foreach (var item in strategy.Items)
+                    sb.AppendLine($"- {item.itemName} (ID: {item.itemId}): {item.description}");
                 sb.AppendLine();
             }
 
             sb.AppendLine("RULES:");
             sb.AppendLine($"- You are debating against {opponent.characterName} to persuade them.");
-            sb.AppendLine("- Weave your agenda points, evidence, and skills naturally across turns.");
+            sb.AppendLine("- Use your skills and strategy naturally across turns.");
             sb.AppendLine("- When using evidence, include the tag: <evidence_used=ID>");
-            sb.AppendLine("- When using a skill technique, include the tag: <skill_used=ID>");
             sb.AppendLine("- Keep responses to 2-3 sentences of dialogue only. No narration.");
             if (player.loseConditions != null && player.loseConditions.Length > 0)
             {
@@ -327,12 +334,12 @@ namespace SilverTongue.BattleScene
         private string GetPlayerThinkingEffort()
         {
             var max = ThinkingEffort.Medium;
-            var agenda = _manager.Agenda;
-            if (agenda != null)
+            var player = _manager.SelectedBattler;
+            if (player.skills != null)
             {
-                foreach (var entry in agenda)
-                    if (entry.Skill != null && entry.Skill.thinkingEffort > max)
-                        max = entry.Skill.thinkingEffort;
+                foreach (var skill in player.skills)
+                    if (skill.thinkingEffort > max)
+                        max = skill.thinkingEffort;
             }
             return max.ToString().ToLower();
         }
@@ -370,7 +377,6 @@ namespace SilverTongue.BattleScene
             await MovePanelBackAsync(false);
             if (!_isBattleActive) return;
 
-            // Wait for auto-progress or manual advance
             if (!_isAutoProgress)
             {
                 _waitingForInput = true;
@@ -379,7 +385,6 @@ namespace SilverTongue.BattleScene
                 if (!_isBattleActive) return;
             }
 
-            // Start the battle loop
             await RunBattleLoop();
         }
 
@@ -418,7 +423,6 @@ namespace SilverTongue.BattleScene
                     _opponentHistory.Add(new LLMMessage("user", playerContent));
                     ShowDialogue(_manager.SelectedBattler.characterName, playerContent, playerResponse.ThoughtSummary);
 
-                    // Fast Check: did player trigger their own lose conditions?
                     if (CheckLoseConditions(_manager.SelectedBattler.loseConditions, playerContent))
                     {
                         _isBattleActive = false;
@@ -431,7 +435,6 @@ namespace SilverTongue.BattleScene
                 await MovePanelBackAsync(true);
                 if (!_isBattleActive) return;
 
-                // Wait for auto-progress or manual advance
                 if (!_isAutoProgress)
                 {
                     _waitingForInput = true;
@@ -464,7 +467,6 @@ namespace SilverTongue.BattleScene
                     _playerHistory.Add(new LLMMessage("user", opponentContent));
                     ShowDialogue(_manager.Opponent.characterName, opponentContent, opponentResponse.ThoughtSummary);
 
-                    // Fast Check: did opponent trigger their lose conditions?
                     if (CheckLoseConditions(_manager.Opponent.loseConditions, opponentContent))
                     {
                         _isBattleActive = false;
@@ -480,7 +482,6 @@ namespace SilverTongue.BattleScene
                 _manager.AdvanceTurn();
                 UpdateTurnTracker();
 
-                // Wait for auto-progress or manual advance between turns
                 if (!_isAutoProgress)
                 {
                     _waitingForInput = true;
@@ -490,7 +491,6 @@ namespace SilverTongue.BattleScene
                 }
             }
 
-            // Max turns reached → Final Verdict
             if (_isBattleActive)
             {
                 await RunFinalVerdict();
@@ -516,7 +516,6 @@ namespace SilverTongue.BattleScene
             ShowDialogue("JUDGE", "Maximum turns reached. Delivering final verdict...", null);
             ShowThinking("Judge");
 
-            // Build the full debate log for the judge
             var logBuilder = new StringBuilder();
             foreach (var entry in _manager.ConversationHistory)
                 logBuilder.AppendLine($"[{entry.SpeakerName}]: {entry.SpeechText}");
@@ -581,14 +580,12 @@ namespace SilverTongue.BattleScene
                 SpeechText = text,
                 Timestamp = $"Turn {_manager.CurrentTurn}",
                 IsPlayer = speaker == _manager.SelectedBattler.characterName,
-                EvidenceUsed = ParseTag(text, "evidence_used"),
-                SkillUsed = ParseTag(text, "skill_used")
+                EvidenceUsed = ParseTag(text, "evidence_used")
             });
         }
 
         private string CleanDialogue(string raw)
         {
-            // Strip [Thought Process] prefix if present
             var match = Regex.Match(raw, @"\[Thought Process\].*?\n(.+)", RegexOptions.Singleline);
             return match.Success ? match.Groups[1].Value.Trim() : raw.Trim();
         }

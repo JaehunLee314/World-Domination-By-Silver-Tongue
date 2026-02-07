@@ -20,15 +20,12 @@ namespace SilverTongue.BattleScene
         [SerializeField] private TextMeshProUGUI playerLoseConditionsText;
         [SerializeField] private TextMeshProUGUI opponentLoseConditionsText;
 
-        [Header("Agenda Slots")]
-        [SerializeField] private AgendaSlotUI[] agendaSlots = new AgendaSlotUI[3];
+        [Header("Strategy Panel")]
+        [SerializeField] private StrategyPanelUI strategyPanel;
 
         [Header("Inventory Panel")]
         [SerializeField] private Transform inventoryGrid;
         [SerializeField] private GameObject inventoryItemPrefab;
-        [SerializeField] private Button filterAllButton;
-        [SerializeField] private Button filterSkillButton;
-        [SerializeField] private Button filterItemButton;
 
         [Header("Action")]
         [SerializeField] private Button confirmStrategyButton;
@@ -47,6 +44,7 @@ namespace SilverTongue.BattleScene
             UpdateTurnCounter();
             PopulateInventory();
             SetupButtons();
+            strategyPanel.Setup();
         }
 
         private void SetupCharacterDisplay()
@@ -81,20 +79,12 @@ namespace SilverTongue.BattleScene
             confirmStrategyButton.onClick.RemoveAllListeners();
             confirmStrategyButton.onClick.AddListener(OnConfirmStrategy);
 
-            filterAllButton.onClick.RemoveAllListeners();
-            filterAllButton.onClick.AddListener(() => FilterInventory(null));
-            filterSkillButton.onClick.RemoveAllListeners();
-            filterSkillButton.onClick.AddListener(() => FilterInventory(ItemType.SkillBook));
-            filterItemButton.onClick.RemoveAllListeners();
-            filterItemButton.onClick.AddListener(() => FilterInventory(ItemType.Evidence));
-
             if (logButton != null)
             {
                 logButton.onClick.RemoveAllListeners();
                 logButton.onClick.AddListener(() => _manager.ShowConversationHistory());
             }
 
-            // Update confirm button label based on pause state
             var confirmLabel = confirmStrategyButton.GetComponentInChildren<TextMeshProUGUI>();
             if (confirmLabel != null)
                 confirmLabel.text = _manager.IsPausedFromBattle ? "RESUME BATTLE" : "CONFIRM STRATEGY";
@@ -128,18 +118,14 @@ namespace SilverTongue.BattleScene
             }
         }
 
-        private void PopulateInventory(ItemType? filter = null)
+        private void PopulateInventory()
         {
             foreach (Transform child in inventoryGrid)
                 Destroy(child.gameObject);
 
             if (GameManager.Instance == null) return;
 
-            var items = filter.HasValue
-                ? GameManager.Instance.GetItemsByType(filter.Value)
-                : GameManager.Instance.playerItems;
-
-            foreach (var item in items)
+            foreach (var item in GameManager.Instance.playerItems)
             {
                 var itemObj = Instantiate(inventoryItemPrefab, inventoryGrid);
                 var itemUI = itemObj.GetComponent<InventoryItemUI>();
@@ -148,34 +134,19 @@ namespace SilverTongue.BattleScene
             }
         }
 
-        private void FilterInventory(ItemType? type)
-        {
-            PopulateInventory(type);
-        }
-
         private void OnBackToSelection()
         {
             _manager.ReturnToBattlerSelection();
         }
 
-        private void CollectAndSetAgenda()
+        private void CollectAndSetStrategy()
         {
-            var entries = new AgendaEntry[agendaSlots.Length];
-            for (int i = 0; i < agendaSlots.Length; i++)
-            {
-                entries[i] = new AgendaEntry
-                {
-                    PointText = agendaSlots[i].pointText,
-                    Skill = agendaSlots[i].assignedSkill,
-                    Evidence = agendaSlots[i].assignedItem
-                };
-            }
-            _manager.SetAgenda(entries);
+            _manager.SetStrategy(strategyPanel.CollectStrategy());
         }
 
         private void OnConfirmStrategy()
         {
-            CollectAndSetAgenda();
+            CollectAndSetStrategy();
 
             if (_manager.IsPausedFromBattle)
                 _manager.ResumeFromStrategy();

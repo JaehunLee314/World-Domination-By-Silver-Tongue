@@ -24,7 +24,7 @@ namespace SilverTongue.DummyInfoGatheringScene
             foreach (var item in items)
             {
                 if (item != null)
-                    itemDisplay += $"  - {item.itemName} ({item.itemType})\n";
+                    itemDisplay += $"  - {item.itemName}\n";
             }
             itemListText.text = itemDisplay;
 

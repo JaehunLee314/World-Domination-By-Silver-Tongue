@@ -35,20 +35,16 @@ public class BattleSceneComposer
         charProp.GetArrayElementAtIndex(1).objectReferenceValue = reina;
         charProp.GetArrayElementAtIndex(2).objectReferenceValue = zarvoth;
 
-        // Load item SOs
+        // Load item SOs (evidence only, no skill items)
         var diary = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Evidence_SecretDiary.asset");
         var photo = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Evidence_PhotoAlbum.asset");
         var ramen = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Evidence_RamenRecipe.asset");
-        var tsundere = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Skill_TsundereLogic.asset");
-        var logic = AssetDatabase.LoadAssetAtPath<ItemSO>("Assets/ScriptableObjects/Items/Skill_LogicalDeduction.asset");
 
         var itemsProp = so.FindProperty("playerItems");
-        itemsProp.arraySize = 5;
+        itemsProp.arraySize = 3;
         itemsProp.GetArrayElementAtIndex(0).objectReferenceValue = diary;
         itemsProp.GetArrayElementAtIndex(1).objectReferenceValue = photo;
         itemsProp.GetArrayElementAtIndex(2).objectReferenceValue = ramen;
-        itemsProp.GetArrayElementAtIndex(3).objectReferenceValue = tsundere;
-        itemsProp.GetArrayElementAtIndex(4).objectReferenceValue = logic;
         so.ApplyModifiedProperties();
 
         // === 2. Instantiate Canvas Prefabs ===
@@ -76,7 +72,6 @@ public class BattleSceneComposer
             : null;
 
         // Remove duplicate EventSystems (keep only one)
-        // The first canvas has EventSystem, remove from others
         var esSS = strategySelectingObj.transform.Find("EventSystem");
         if (esSS != null) Object.DestroyImmediate(esSS.gameObject);
         var esBattle = battleObj.transform.Find("EventSystem");
@@ -90,7 +85,7 @@ public class BattleSceneComposer
 
         var bsmSo = new SerializedObject(bsm);
 
-        // Set canvas references (the root GameObjects that get activated/deactivated)
+        // Set canvas references
         bsmSo.FindProperty("battlerSelectingCanvas").objectReferenceValue = battlerSelectingObj;
         bsmSo.FindProperty("strategySelectingCanvas").objectReferenceValue = strategySelectingObj;
         bsmSo.FindProperty("battleCanvas").objectReferenceValue = battleObj;
@@ -133,7 +128,6 @@ public class BattleSceneComposer
 
     static void DestroyIfExists(string name)
     {
-        // Destroy ALL root objects with this name (including inactive ones)
         var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
         var rootObjects = scene.GetRootGameObjects();
         foreach (var root in rootObjects)
@@ -172,18 +166,14 @@ public class BattleSceneComposer
         if (view == null) return;
         var so = new SerializedObject(view);
 
-        // Character card prefab
         var cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/BattleScene/UI/CharacterCard.prefab");
         so.FindProperty("characterCardPrefab").objectReferenceValue = cardPrefab;
 
-        // Container = ScrollView/Viewport/Content
         var content = FindChild(root, "Canvas/ScrollView/Viewport/Content");
         so.FindProperty("characterCardContainer").objectReferenceValue = content != null ? content.transform : null;
 
-        // ScrollRect reference
         so.FindProperty("scrollRect").objectReferenceValue = FindInChildren<ScrollRect>(root, "Canvas/ScrollView");
 
-        // Confirmation popup
         so.FindProperty("confirmationPopup").objectReferenceValue = FindChild(root, "Canvas/ConfirmationPopup");
         so.FindProperty("confirmPopupImage").objectReferenceValue = FindInChildren<Image>(root, "Canvas/ConfirmationPopup/PopupPanel/PopupImage");
         so.FindProperty("confirmPopupName").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/ConfirmationPopup/PopupPanel/PopupNameText");
@@ -213,14 +203,8 @@ public class BattleSceneComposer
         so.FindProperty("playerLoseConditionsText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/MiddleSection/PlayerPanel/PlayerLoseConditionsText");
         so.FindProperty("opponentLoseConditionsText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/MiddleSection/OpponentPanel/OpponentLoseConditionsText");
 
-        // Agenda slots
-        var agendaProp = so.FindProperty("agendaSlots");
-        agendaProp.arraySize = 3;
-        for (int i = 0; i < 3; i++)
-        {
-            var slot = FindInChildren<AgendaSlotUI>(root, $"Canvas/BottomSection/AgendaPanel/AgendaSlot{i + 1}");
-            agendaProp.GetArrayElementAtIndex(i).objectReferenceValue = slot;
-        }
+        // Strategy panel
+        so.FindProperty("strategyPanel").objectReferenceValue = FindInChildren<StrategyPanelUI>(root, "Canvas/BottomSection/StrategyPanel");
 
         // Inventory
         var invItemPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/BattleScene/UI/InventoryItem.prefab");
@@ -228,10 +212,6 @@ public class BattleSceneComposer
 
         var invGrid = FindChild(root, "Canvas/BottomSection/InventoryPanel/InventoryScroll/Viewport/Content");
         so.FindProperty("inventoryGrid").objectReferenceValue = invGrid != null ? invGrid.transform : null;
-
-        so.FindProperty("filterAllButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/BottomSection/InventoryPanel/FilterRow/FilterAllButton");
-        so.FindProperty("filterSkillButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/BottomSection/InventoryPanel/FilterRow/FilterSkillButton");
-        so.FindProperty("filterItemButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/BottomSection/InventoryPanel/FilterRow/FilterItemButton");
 
         so.FindProperty("confirmStrategyButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/ConfirmStrategyButton");
 
@@ -249,26 +229,22 @@ public class BattleSceneComposer
         if (view == null) return;
         var so = new SerializedObject(view);
 
-        // Top UI
         so.FindProperty("turnTrackerText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/TopUI/TurnTrackerText");
         so.FindProperty("autoProgressButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/DialogueArea/AutoProgressButton");
         so.FindProperty("autoProgressButtonText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/AutoProgressButton/Text");
         so.FindProperty("goToStrategyButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/TopUI/GoToStrategyButton");
         so.FindProperty("logButton").objectReferenceValue = FindInChildren<Button>(root, "Canvas/TopUI/LogButton");
 
-        // Characters
         so.FindProperty("playerCharacterImage").objectReferenceValue = FindInChildren<Image>(root, "Canvas/StageArea/PlayerCharacterPanel/PlayerCharacterImage");
         so.FindProperty("opponentCharacterImage").objectReferenceValue = FindInChildren<Image>(root, "Canvas/StageArea/OpponentCharacterPanel/OpponentCharacterImage");
         so.FindProperty("playerNameLabel").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/StageArea/PlayerCharacterPanel/PlayerNameLabel");
         so.FindProperty("opponentNameLabel").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/StageArea/OpponentCharacterPanel/OpponentNameLabel");
 
-        // Stage Animation (panel RectTransforms for smooth movement)
         var playerPanelTr = root.transform.Find("Canvas/StageArea/PlayerCharacterPanel");
         so.FindProperty("playerPanel").objectReferenceValue = playerPanelTr != null ? playerPanelTr.GetComponent<RectTransform>() : null;
         var opponentPanelTr = root.transform.Find("Canvas/StageArea/OpponentCharacterPanel");
         so.FindProperty("opponentPanel").objectReferenceValue = opponentPanelTr != null ? opponentPanelTr.GetComponent<RectTransform>() : null;
 
-        // Dialogue
         so.FindProperty("speakerNameText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/SpeakerNameText");
         so.FindProperty("dialogueText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/DialogueText");
         so.FindProperty("thoughtText").objectReferenceValue = FindInChildren<TMPro.TextMeshProUGUI>(root, "Canvas/DialogueArea/ThoughtText");

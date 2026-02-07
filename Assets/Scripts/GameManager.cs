@@ -27,20 +27,5 @@ namespace SilverTongue
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-
-        public List<ItemSO> GetItemsByType(ItemType type)
-        {
-            return playerItems.FindAll(item => item.itemType == type);
-        }
-
-        public List<ItemSO> GetEvidence()
-        {
-            return GetItemsByType(ItemType.Evidence);
-        }
-
-        public List<ItemSO> GetSkillBooks()
-        {
-            return GetItemsByType(ItemType.SkillBook);
-        }
     }
 }

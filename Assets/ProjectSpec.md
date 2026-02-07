@@ -6,7 +6,7 @@
 
 **Project Name:** World-Domination-By-Silver-Tongue  
 **Genre:** Lighthearted JRPG-parody / Persuasion-based Combat  
-**Concept:** A comedic take on the "Talk-no-Jutsu" trope. The protagonist eschews physical weaponry in favor of a mix of **real-world persuasion tactics** and **absurd anime logic** to convert hostile enemies into loyal allies (*Nakama*).
+**Concept:** A comedic take on the "Talk-no-Jutsu" trope. The protagonist eschews physical weaponry in favor of **character-specific persuasion skills** and **gathered evidence** to convert hostile enemies into loyal allies (*Nakama*).
 
 ### 1.2 Tech Stack
 
@@ -23,8 +23,8 @@ The game operates on a structured ssequence of exploration, preparation, and ver
 2. **Info Gathering Scene:** Exploration and evidence collection via movement and interaction.
 3. **Battle Scene:** A unified scene containing multiple canvas-based UI phases:
    - **BattlerSelectingCanvas:** Choosing the active negotiator based on character profiles.
-   - **StrategySelectingCanvas:** Mapping out the debate agenda, with an option to loop back to Battler Selection.
-   - **BattleCanvas:** 1v1 AI-driven auto-battle utilizing gathered evidence and skills.
+   - **StrategySelectingCanvas:** Writing a free-form strategy and selecting evidence items, with an option to loop back to Battler Selection.
+   - **BattleCanvas:** 1v1 AI-driven auto-battle utilizing character skills, strategy text, and evidence.
    - **BattleResultCanvas:** Outcome evaluation and reward processing.
 4. **Loop/Ending:** Return to gathering or proceed to the final conclusion.
 
@@ -66,17 +66,12 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 
 ### 3.3 Inventory Prefab
 
-**Structure:** A grid-like overlay containing multiple item images.  
-**Item Cards:** Each cell contains an item image with its name bounded below it.  
-**Popup Details:** Selecting an item triggers a popup with:
+**Structure:** A grid-like overlay containing evidence item images.
+**Item Cards:** Each cell contains an item image with its name below it.
+**Popup Details:** Selecting an item triggers a popup with the item image and description.
 
-- The item image.
-- Item Type (Evidence or Skill Book).
-- Detailed Description.
-
-**Close Button:** Located at the bottom middle.  
-**Visual Effect:** The surrounding area of the popup must be blurred.  
-**Functionality:** Supports item filtering in the controller code. Close buttons for the main inventory are at the bottom.
+**Close Button:** Located at the bottom middle.
+**Visual Effect:** The surrounding area of the popup must be blurred.
 
 ### 3.4 ConversationHistoryCanvas Prefab
 
@@ -85,7 +80,7 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 
 - Speaker name (left-aligned for player, right-aligned for opponent).
 - Speech text with timestamp.
-- Optional indicators for evidence/skills used.
+- Optional indicator for evidence used.
 
 **Visual Layout:** Chat-bubble style with alternating alignment based on speaker.  
 **Close Button:** Located at the bottom middle.  
@@ -94,25 +89,25 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 
 ### 3.5 BattlerSelectingCanvas (within BattleScene)
 
-**UI Layout:** A horizontally scrollable table for choosing participants.  
+**UI Layout:** A horizontally scrollable table for choosing participants.
 **Columns per Character:**
 
 - **Top 2/3:** Character profile image.
-- **Bottom 1/3:** Name, Personality, Intelligence, and must-lose conditions (typically 3).
+- **Bottom 1/3:** Name, Personality, Intelligence, Skills list, and must-lose conditions.
 
-**Interaction:** A selection button associated with each character entry at the bottom.  
+**Interaction:** A selection button associated with each character entry at the bottom.
 **Verification:** Choosing a character triggers a confirmation popup.
 
 ### 3.6 StrategySelectingCanvas (within BattleScene)
 
-**Top Bar:** A button to return to character selection (top right), a turn counter (e.g., Turn 3/7) at top middle, and a log button (top left) to open the conversation history.  
-**Middle Section:** Displays the user's selected character (left) and opponent (right). Clicking a character toggles their must-lose conditions.  
+**Top Bar:** A button to return to character selection (top right), a turn counter (e.g., Turn 3/7) at top middle, and a log button (top left) to open the conversation history.
+**Middle Section:** Displays the user's selected character (left) and opponent (right) with their must-lose conditions shown below each.
 **Bottom Section (Split):**
 
-- **Left (Agenda):** Three vertical slots formatted as `#N [Point Text (≤ 30 words)] [Skill Placeholder] [Item Placeholder]`.
-- **Right (Inventory):** A version of the inventory prefab with skill and item filters.
+- **Left (Strategy Panel):** A free-form text input field for describing the player's strategy, plus an item grid with drop target slots for assigning evidence.
+- **Right (Inventory):** A grid of all collected evidence items.
 
-**Interaction:** Placeholders support **Drag & Drop** from the inventory.
+**Interaction:** Evidence items support **Drag & Drop** from inventory to strategy panel item slots.
 
 ### 3.7 BattleCanvas (within BattleScene)
 
@@ -132,29 +127,25 @@ To ensure a highly organized LLM-readable project, the directory must strictly f
 
 ### 4.1 Character ScriptableObject
 
-**Identity:** Name and profile image.  
-**Stats:** Personality traits and intelligence levels (determines LLM `thinking_effort`).  
-**Lore:** `SystemPromptLore` (Personality, secrets, and speaking style).  
-**Voice Tone:** String descriptors (e.g., "Arrogant," "Shy").  
-**Conditions:** `LoseConditionRule`: Phrases or behaviors that cause immediate failure. Regular expression or validation function name.
+**Identity:** Name and profile image.
+**Stats:** Personality traits and intelligence levels.
+**Skills:** Array of inherent persuasion skills, each with: name, description, prompt modifier (injected into LLM context), and thinking effort level (Low/Medium/High).
+**Lore:** `SystemPromptLore` (Personality, secrets, and speaking style).
+**Voice Tone:** String descriptors (e.g., "Arrogant," "Shy").
+**Conditions:** `LoseConditionRule`: Phrases or behaviors that cause immediate failure.
 
 ### 4.2 Item ScriptableObject
 
-**Non-Skill (Evidence):**
+All items are **evidence** — factual objects or information gathered during exploration.
 
 - `ID` (string) for identification.
+- `Name` and `Image` for display.
 - `Description` of the fact or object.
-
-**Skill (Skill Book):**
-
-- `SkillName` (e.g., "Tsundere Logic" or "Logical Deduction").
-- `PromptModifier`: Text injected into the LLM context to steer persuasion style.
-- `ThinkingEffort`: Determines inference depth (Low, Medium, High).
 
 ### 4.3 The Persuasion Engine (AI Logic)
 
-**AgentLLM Class:** Constructs payloads for `gemini-3-flash-preview` and parses responses.  
-**Payload Components:** Role definition, world state, character lore, gameplay rules, and skill/evidence injections.  
+**AgentLLM Class:** Constructs payloads for `gemini-3-flash-preview` and parses responses.
+**Payload Components:** Role definition, world state, character lore, character skills, player strategy text, evidence items, and gameplay rules.
 **Output Format:** Requires `[Thought Process] Dialogue <tags>` (e.g., `<evidence_used=ID>`).  
 **The Judge:**
 

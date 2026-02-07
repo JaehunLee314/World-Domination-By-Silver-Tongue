@@ -2,6 +2,24 @@ using UnityEngine;
 
 namespace SilverTongue.Data
 {
+    public enum ThinkingEffort
+    {
+        Low,
+        Medium,
+        High
+    }
+
+    [System.Serializable]
+    public struct SkillData
+    {
+        public string skillName;
+        [TextArea(1, 3)]
+        public string description;
+        [TextArea(2, 5)]
+        public string promptModifier;
+        public ThinkingEffort thinkingEffort;
+    }
+
     [CreateAssetMenu(fileName = "NewCharacter", menuName = "SilverTongue/Character")]
     public class CharacterSO : ScriptableObject
     {
@@ -14,6 +32,9 @@ namespace SilverTongue.Data
         public string personality;
         [Range(1, 10)]
         public int intelligence = 5;
+
+        [Header("Skills")]
+        public SkillData[] skills;
 
         [Header("Lore")]
         [TextArea(3, 10)]

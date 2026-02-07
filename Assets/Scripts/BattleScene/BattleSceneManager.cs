@@ -13,11 +13,10 @@ namespace SilverTongue.BattleScene
         BattleResult
     }
 
-    public struct AgendaEntry
+    public struct StrategyEntry
     {
-        public string PointText;
-        public ItemSO Skill;
-        public ItemSO Evidence;
+        public string StrategyText;
+        public List<ItemSO> Items;
     }
 
     public class BattleSceneManager : MonoBehaviour
@@ -48,7 +47,7 @@ namespace SilverTongue.BattleScene
         private int _currentTurn;
         private bool _isPausedFromBattle;
         private readonly List<ConversationEntry> _conversationHistory = new List<ConversationEntry>();
-        private AgendaEntry[] _agenda;
+        private StrategyEntry _strategy;
 
         public CharacterSO SelectedBattler { get; private set; }
         public CharacterSO Opponent => opponent;
@@ -57,11 +56,11 @@ namespace SilverTongue.BattleScene
         public ILLMService LLMService => _llmService;
         public bool IsPausedFromBattle => _isPausedFromBattle;
         public IReadOnlyList<ConversationEntry> ConversationHistory => _conversationHistory;
-        public AgendaEntry[] Agenda => _agenda;
+        public StrategyEntry Strategy => _strategy;
 
-        public void SetAgenda(AgendaEntry[] agenda)
+        public void SetStrategy(StrategyEntry strategy)
         {
-            _agenda = agenda;
+            _strategy = strategy;
         }
 
         private void Start()
