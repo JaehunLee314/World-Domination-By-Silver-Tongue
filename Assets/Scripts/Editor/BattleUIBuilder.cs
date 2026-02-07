@@ -398,10 +398,10 @@ public class BattleUIBuilder
         logBtnRt.anchoredPosition = new Vector2(15, 0);
         logBtnRt.sizeDelta = new Vector2(80, 40);
 
-        // === MIDDLE SECTION (62%) ===
+        // === MIDDLE SECTION (50%) ===
         var midSection = CreateUIObject("MiddleSection", canvas);
         var midRt = midSection.GetComponent<RectTransform>();
-        SetAnchors(midRt, new Vector2(0, 0.30f), new Vector2(1, 0.92f), new Vector2(0.5f, 0.5f));
+        SetAnchors(midRt, new Vector2(0, 0.42f), new Vector2(1, 0.92f), new Vector2(0.5f, 0.5f));
         midRt.offsetMin = Vector2.zero;
         midRt.offsetMax = Vector2.zero;
 
@@ -414,23 +414,21 @@ public class BattleUIBuilder
 
         var playerVlg = playerPanel.AddComponent<VerticalLayoutGroup>();
         playerVlg.spacing = 5;
+        playerVlg.padding = new RectOffset(10, 10, 5, 5);
         playerVlg.childAlignment = TextAnchor.MiddleCenter;
 
         var playerImgObj = CreateUIObject("PlayerImage", playerPanel.transform);
-        playerImgObj.GetComponent<RectTransform>().sizeDelta = new Vector2(500, 500);
+        playerImgObj.GetComponent<RectTransform>().sizeDelta = new Vector2(350, 350);
         var playerImg = playerImgObj.AddComponent<Image>();
         playerImg.color = new Color(0.4f, 0.4f, 0.5f, 1f);
-        var playerImgBtn = playerImgObj.AddComponent<Button>();
-        playerImgBtn.targetGraphic = playerImg;
 
         var playerNameObj = CreateUIObject("PlayerNameText", playerPanel.transform);
-        playerNameObj.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 30);
+        playerNameObj.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 28);
         AddTMP(playerNameObj, "Player", 22, TextAlignmentOptions.Center, Color.cyan);
 
         var playerCondObj = CreateUIObject("PlayerLoseConditionsText", playerPanel.transform);
-        playerCondObj.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 60);
-        AddTMP(playerCondObj, "", 14, TextAlignmentOptions.TopLeft, new Color(1f, 0.6f, 0.6f));
-        playerCondObj.SetActive(false);
+        playerCondObj.GetComponent<RectTransform>().sizeDelta = new Vector2(350, 80);
+        AddTMP(playerCondObj, "", 13, TextAlignmentOptions.TopLeft, new Color(1f, 0.6f, 0.6f));
 
         // Opponent panel (right)
         var oppPanel = CreateUIObject("OpponentPanel", midSection.transform);
@@ -441,28 +439,26 @@ public class BattleUIBuilder
 
         var oppVlg = oppPanel.AddComponent<VerticalLayoutGroup>();
         oppVlg.spacing = 5;
+        oppVlg.padding = new RectOffset(10, 10, 5, 5);
         oppVlg.childAlignment = TextAnchor.MiddleCenter;
 
         var oppImgObj = CreateUIObject("OpponentImage", oppPanel.transform);
-        oppImgObj.GetComponent<RectTransform>().sizeDelta = new Vector2(500, 500);
+        oppImgObj.GetComponent<RectTransform>().sizeDelta = new Vector2(350, 350);
         var oppImg = oppImgObj.AddComponent<Image>();
         oppImg.color = new Color(0.5f, 0.3f, 0.3f, 1f);
-        var oppImgBtn = oppImgObj.AddComponent<Button>();
-        oppImgBtn.targetGraphic = oppImg;
 
         var oppNameObj = CreateUIObject("OpponentNameText", oppPanel.transform);
-        oppNameObj.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 30);
+        oppNameObj.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 28);
         AddTMP(oppNameObj, "Opponent", 22, TextAlignmentOptions.Center, Color.red);
 
         var oppCondObj = CreateUIObject("OpponentLoseConditionsText", oppPanel.transform);
-        oppCondObj.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 60);
-        AddTMP(oppCondObj, "", 14, TextAlignmentOptions.TopLeft, new Color(1f, 0.6f, 0.6f));
-        oppCondObj.SetActive(false);
+        oppCondObj.GetComponent<RectTransform>().sizeDelta = new Vector2(350, 80);
+        AddTMP(oppCondObj, "", 13, TextAlignmentOptions.TopLeft, new Color(1f, 0.6f, 0.6f));
 
-        // === BOTTOM SECTION (30%) ===
+        // === BOTTOM SECTION (42%) ===
         var botSection = CreateUIObject("BottomSection", canvas);
         var botRt = botSection.GetComponent<RectTransform>();
-        SetAnchors(botRt, Vector2.zero, new Vector2(1, 0.30f), new Vector2(0.5f, 0));
+        SetAnchors(botRt, Vector2.zero, new Vector2(1, 0.42f), new Vector2(0.5f, 0));
         botRt.offsetMin = Vector2.zero;
         botRt.offsetMax = Vector2.zero;
 
@@ -520,9 +516,9 @@ public class BattleUIBuilder
         // Item slots grid container
         var itemSlotsContainer = CreateUIObject("ItemSlotsContainer", strategyPanel.transform);
         var itemSlotsRt = itemSlotsContainer.GetComponent<RectTransform>();
-        itemSlotsRt.sizeDelta = new Vector2(0, 80);
+        itemSlotsRt.sizeDelta = new Vector2(0, 100);
         var itemSlotsGrid = itemSlotsContainer.AddComponent<GridLayoutGroup>();
-        itemSlotsGrid.cellSize = new Vector2(70, 70);
+        itemSlotsGrid.cellSize = new Vector2(90, 90);
         itemSlotsGrid.spacing = new Vector2(8, 8);
         itemSlotsGrid.padding = new RectOffset(5, 5, 5, 5);
         itemSlotsGrid.childAlignment = TextAnchor.MiddleLeft;
@@ -531,7 +527,8 @@ public class BattleUIBuilder
         for (int i = 1; i <= 4; i++)
         {
             var slotObj = CreateUIObject($"ItemSlot{i}", itemSlotsContainer.transform);
-            slotObj.GetComponent<RectTransform>().sizeDelta = new Vector2(70, 70);
+            slotObj.GetComponent<RectTransform>().sizeDelta = new Vector2(90, 90);
+            slotObj.AddComponent<Image>().color = new Color(0.25f, 0.25f, 0.3f, 0.6f);
 
             var slotVlg = slotObj.AddComponent<VerticalLayoutGroup>();
             slotVlg.spacing = 2;
@@ -541,12 +538,12 @@ public class BattleUIBuilder
             slotVlg.childForceExpandWidth = true;
 
             var slotImgObj = CreateUIObject("SlotImage", slotObj.transform);
-            slotImgObj.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
+            slotImgObj.GetComponent<RectTransform>().sizeDelta = new Vector2(65, 65);
             slotImgObj.AddComponent<Image>().color = new Color(0.8f, 0.8f, 0.8f, 0.5f);
 
             var slotLblObj = CreateUIObject("SlotLabel", slotObj.transform);
-            slotLblObj.GetComponent<RectTransform>().sizeDelta = new Vector2(60, 16);
-            AddTMP(slotLblObj, "Item", 11);
+            slotLblObj.GetComponent<RectTransform>().sizeDelta = new Vector2(80, 18);
+            AddTMP(slotLblObj, "Item", 12);
 
             slotObj.AddComponent<SilverTongue.BattleScene.DropTarget>();
         }

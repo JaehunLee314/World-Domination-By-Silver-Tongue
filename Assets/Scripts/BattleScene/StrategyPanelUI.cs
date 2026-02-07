@@ -27,6 +27,7 @@ namespace SilverTongue.BattleScene
             foreach (var dt in _dropTargets)
             {
                 dt.OnItemDropped = OnItemDroppedToSlot;
+                dt.OnItemRemoved = OnItemRemovedFromSlot;
             }
 
             ClearAll();
@@ -36,6 +37,11 @@ namespace SilverTongue.BattleScene
         {
             if (!assignedItems.Contains(item))
                 assignedItems.Add(item);
+        }
+
+        private void OnItemRemovedFromSlot(ItemSO item)
+        {
+            assignedItems.Remove(item);
         }
 
         public void ClearAll()

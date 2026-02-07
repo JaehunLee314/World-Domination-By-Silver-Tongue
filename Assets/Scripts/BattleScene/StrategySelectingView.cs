@@ -31,14 +31,10 @@ namespace SilverTongue.BattleScene
         [SerializeField] private Button confirmStrategyButton;
 
         private BattleSceneManager _manager;
-        private bool _showPlayerConditions;
-        private bool _showOpponentConditions;
 
         public void Initialize(BattleSceneManager manager)
         {
             _manager = manager;
-            _showPlayerConditions = false;
-            _showOpponentConditions = false;
 
             SetupCharacterDisplay();
             UpdateTurnCounter();
@@ -60,10 +56,18 @@ namespace SilverTongue.BattleScene
             if (opponent.profileImage != null)
                 opponentImage.sprite = opponent.profileImage;
 
-            playerLoseConditionsText.text = "";
-            opponentLoseConditionsText.text = "";
-            playerLoseConditionsText.gameObject.SetActive(false);
-            opponentLoseConditionsText.gameObject.SetActive(false);
+            // Always show lose conditions
+            playerLoseConditionsText.text = FormatLoseConditions(player.loseConditions);
+            opponentLoseConditionsText.text = FormatLoseConditions(opponent.loseConditions);
+        }
+
+        private string FormatLoseConditions(string[] conditions)
+        {
+            if (conditions == null || conditions.Length == 0) return "";
+            string text = "<b>Must-Lose Conditions:</b>\n";
+            foreach (var cond in conditions)
+                text += $"- {cond}\n";
+            return text.TrimEnd();
         }
 
         private void UpdateTurnCounter()
@@ -88,34 +92,6 @@ namespace SilverTongue.BattleScene
             var confirmLabel = confirmStrategyButton.GetComponentInChildren<TextMeshProUGUI>();
             if (confirmLabel != null)
                 confirmLabel.text = _manager.IsPausedFromBattle ? "RESUME BATTLE" : "CONFIRM STRATEGY";
-        }
-
-        public void OnPlayerCharacterClicked()
-        {
-            _showPlayerConditions = !_showPlayerConditions;
-            playerLoseConditionsText.gameObject.SetActive(_showPlayerConditions);
-            if (_showPlayerConditions)
-            {
-                var conditions = _manager.SelectedBattler.loseConditions;
-                string text = "";
-                for (int i = 0; i < conditions.Length; i++)
-                    text += $"- {conditions[i]}\n";
-                playerLoseConditionsText.text = text.TrimEnd();
-            }
-        }
-
-        public void OnOpponentCharacterClicked()
-        {
-            _showOpponentConditions = !_showOpponentConditions;
-            opponentLoseConditionsText.gameObject.SetActive(_showOpponentConditions);
-            if (_showOpponentConditions)
-            {
-                var conditions = _manager.Opponent.loseConditions;
-                string text = "";
-                for (int i = 0; i < conditions.Length; i++)
-                    text += $"- {conditions[i]}\n";
-                opponentLoseConditionsText.text = text.TrimEnd();
-            }
         }
 
         private void PopulateInventory()

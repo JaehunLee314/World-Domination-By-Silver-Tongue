@@ -28,8 +28,10 @@ namespace SilverTongue.BattleScene
             _originalParent = transform.parent;
             _originalSiblingIndex = transform.GetSiblingIndex();
 
-            _rootCanvas = GetComponentInParent<Canvas>().rootCanvas;
-            transform.SetParent(_rootCanvas.transform, true);
+            var parentCanvas = GetComponentInParent<Canvas>();
+            _rootCanvas = parentCanvas?.rootCanvas;
+            if (_rootCanvas != null)
+                transform.SetParent(_rootCanvas.transform, true);
 
             _canvasGroup.blocksRaycasts = false;
             _canvasGroup.alpha = 0.7f;
