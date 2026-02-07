@@ -28,6 +28,7 @@ namespace SilverTongue.BattleScene
             {
                 dt.OnItemDropped = OnItemDroppedToSlot;
                 dt.OnItemRemoved = OnItemRemovedFromSlot;
+                dt.CanAcceptItem = item => !assignedItems.Contains(item);
             }
 
             ClearAll();

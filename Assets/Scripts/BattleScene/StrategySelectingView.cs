@@ -89,6 +89,8 @@ namespace SilverTongue.BattleScene
                 logButton.onClick.AddListener(() => _manager.ShowConversationHistory());
             }
 
+            backToSelectionButton.interactable = !_manager.IsPausedFromBattle;
+
             var confirmLabel = confirmStrategyButton.GetComponentInChildren<TextMeshProUGUI>();
             if (confirmLabel != null)
                 confirmLabel.text = _manager.IsPausedFromBattle ? "RESUME BATTLE" : "CONFIRM STRATEGY";

@@ -15,6 +15,7 @@ namespace SilverTongue.BattleScene
 
         public System.Action<ItemSO> OnItemDropped;
         public System.Action<ItemSO> OnItemRemoved;
+        public System.Func<ItemSO, bool> CanAcceptItem;
         public ItemSO AssignedItem { get; private set; }
 
         private void Awake()
@@ -60,6 +61,8 @@ namespace SilverTongue.BattleScene
             if (draggable == null || draggable.InventoryItemUI == null) return;
 
             var item = draggable.InventoryItemUI.Item;
+            if (CanAcceptItem != null && !CanAcceptItem(item)) return;
+
             AssignedItem = item;
             UpdateVisuals(item);
             OnItemDropped?.Invoke(item);
