@@ -5,6 +5,12 @@ using UnityEditor;
 
 public class StartAndInfoUIBuilder
 {
+    // Color palette
+    static readonly Color Accent = new Color(0.973f, 0.961f, 0.275f, 1f);     // #f8f546
+    static readonly Color Secondary = new Color(0.627f, 0.667f, 0.663f, 1f);  // #a0aaa9
+    static readonly Color DarkBg = new Color(0.192f, 0.216f, 0.224f, 1f);     // #313739
+    static readonly Color LightText = new Color(0.973f, 0.973f, 0.973f, 1f);  // #f8f8f8
+
     [MenuItem("Tools/Build Start & Info UI Prefabs")]
     public static void BuildAll()
     {
@@ -47,27 +53,27 @@ public class StartAndInfoUIBuilder
         tmp.text = text;
         tmp.fontSize = fontSize;
         tmp.alignment = align;
-        tmp.color = color ?? Color.white;
+        tmp.color = color ?? LightText;
         tmp.enableWordWrapping = true;
         tmp.overflowMode = TextOverflowModes.Ellipsis;
         return tmp;
     }
 
     static Button CreateButton(string name, Transform parent, string label, Vector2 size,
-        Color bgColor = default)
+        Color bgColor = default, Color textColor = default)
     {
         var btnObj = CreateUIObject(name, parent);
         var rt = btnObj.GetComponent<RectTransform>();
         rt.sizeDelta = size;
         var img = btnObj.AddComponent<Image>();
-        img.color = bgColor == default ? new Color(0.2f, 0.6f, 1f, 1f) : bgColor;
+        img.color = bgColor == default ? Accent : bgColor;
         var btn = btnObj.AddComponent<Button>();
         btn.targetGraphic = img;
 
         var txtObj = CreateUIObject("Text", btnObj.transform);
         var txtRt = txtObj.GetComponent<RectTransform>();
         StretchFill(txtRt);
-        AddTMP(txtObj, label, 24);
+        AddTMP(txtObj, label, 24, TextAlignmentOptions.Center, textColor == default ? DarkBg : textColor);
 
         return btn;
     }
@@ -100,7 +106,7 @@ public class StartAndInfoUIBuilder
         // Background (stretch-fill, dark)
         var bgObj = CreateUIObject("Background", canvasObj.transform);
         StretchFill(bgObj.GetComponent<RectTransform>());
-        bgObj.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.1f, 1f);
+        bgObj.AddComponent<Image>().color = DarkBg;
 
         // Title text (center of screen)
         var titleObj = CreateUIObject("TitleText", canvasObj.transform);
@@ -108,12 +114,12 @@ public class StartAndInfoUIBuilder
         SetAnchors(titleRt, new Vector2(0.05f, 0.45f), new Vector2(0.95f, 0.7f), new Vector2(0.5f, 0.5f));
         titleRt.offsetMin = Vector2.zero;
         titleRt.offsetMax = Vector2.zero;
-        var titleTmp = AddTMP(titleObj, "World Domination\nBy Silver Tongue", 52, TextAlignmentOptions.Center, Color.yellow);
+        var titleTmp = AddTMP(titleObj, "World Domination\nBy Silver Tongue", 52, TextAlignmentOptions.Center, Accent);
         titleTmp.fontStyle = FontStyles.Bold;
 
         // Start button (below title, centered)
         var startBtn = CreateButton("StartButton", canvasObj.transform, "START", new Vector2(250, 60),
-            new Color(0.2f, 0.6f, 1f));
+            Accent);
         var startBtnRt = startBtn.GetComponent<RectTransform>();
         SetAnchors(startBtnRt, new Vector2(0.5f, 0.25f), new Vector2(0.5f, 0.25f), new Vector2(0.5f, 0.5f));
         startBtnRt.sizeDelta = new Vector2(250, 60);
@@ -154,7 +160,7 @@ public class StartAndInfoUIBuilder
         // Background (stretch-fill, dark)
         var bgObj = CreateUIObject("Background", canvasObj.transform);
         StretchFill(bgObj.GetComponent<RectTransform>());
-        bgObj.AddComponent<Image>().color = new Color(0.05f, 0.05f, 0.1f, 1f);
+        bgObj.AddComponent<Image>().color = DarkBg;
 
         // Title text (top area)
         var titleObj = CreateUIObject("TitleText", canvasObj.transform);
@@ -162,7 +168,7 @@ public class StartAndInfoUIBuilder
         SetAnchors(titleRt, new Vector2(0.1f, 0.8f), new Vector2(0.9f, 0.95f), new Vector2(0.5f, 0.5f));
         titleRt.offsetMin = Vector2.zero;
         titleRt.offsetMax = Vector2.zero;
-        var titleTmp = AddTMP(titleObj, "Info Gathering Phase", 40, TextAlignmentOptions.Center, Color.yellow);
+        var titleTmp = AddTMP(titleObj, "Info Gathering Phase", 40, TextAlignmentOptions.Center, Accent);
         titleTmp.fontStyle = FontStyles.Bold;
 
         // Subtitle (brief description)
@@ -172,7 +178,7 @@ public class StartAndInfoUIBuilder
         subtitleRt.offsetMin = Vector2.zero;
         subtitleRt.offsetMax = Vector2.zero;
         AddTMP(subtitleObj, "(Exploration not implemented - items auto-collected)", 20,
-            TextAlignmentOptions.Center, new Color(0.6f, 0.6f, 0.6f));
+            TextAlignmentOptions.Center, Secondary);
 
         // Item list text (middle area, left-aligned)
         var itemListObj = CreateUIObject("ItemListText", canvasObj.transform);
@@ -185,7 +191,7 @@ public class StartAndInfoUIBuilder
 
         // Proceed button (bottom center)
         var proceedBtn = CreateButton("ProceedButton", canvasObj.transform, "PROCEED TO BATTLE", new Vector2(300, 60),
-            new Color(0.8f, 0.3f, 0.1f));
+            Accent);
         var proceedBtnRt = proceedBtn.GetComponent<RectTransform>();
         SetAnchors(proceedBtnRt, new Vector2(0.5f, 0.08f), new Vector2(0.5f, 0.08f), new Vector2(0.5f, 0.5f));
         proceedBtnRt.sizeDelta = new Vector2(300, 60);
