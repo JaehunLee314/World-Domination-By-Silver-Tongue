@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using SilverTongue.Data;
 
 namespace SilverTongue.BattleScene
 {
-    public class InventoryItemUI : MonoBehaviour
+    public class InventoryItemUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("UI Elements")]
         [SerializeField] private Image itemImage;
@@ -25,6 +26,18 @@ namespace SilverTongue.BattleScene
             var draggable = GetComponent<DraggableItem>();
             if (draggable != null)
                 draggable.InventoryItemUI = this;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_item == null || ItemDetailPopup.Instance == null) return;
+            ItemDetailPopup.Instance.Show(_item, GetComponent<RectTransform>());
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (ItemDetailPopup.Instance == null) return;
+            ItemDetailPopup.Instance.Hide();
         }
     }
 }
