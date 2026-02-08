@@ -52,17 +52,6 @@ namespace SilverTongue.BattleSystem
             sb.AppendLine(player.lore);
             sb.AppendLine();
 
-            if (player.skills != null && player.skills.Length > 0)
-            {
-                sb.AppendLine("YOUR SKILLS:");
-                foreach (var skill in player.skills)
-                {
-                    sb.AppendLine($"- {skill.skillName}: {skill.description}");
-                    sb.AppendLine($"  [Technique: {skill.promptModifier}]");
-                }
-                sb.AppendLine();
-            }
-
             if (!string.IsNullOrWhiteSpace(strategy.StrategyText))
             {
                 sb.AppendLine("PLAYER STRATEGY:");
@@ -127,14 +116,7 @@ namespace SilverTongue.BattleSystem
 
         public static string GetThinkingEffort(CharacterSO character)
         {
-            var max = character.thinkingEffort;
-            if (character.skills != null)
-            {
-                foreach (var skill in character.skills)
-                    if (skill.thinkingEffort > max)
-                        max = skill.thinkingEffort;
-            }
-            return max.ToString().ToLower();
+            return character.thinkingEffort.ToString().ToLower();
         }
 
         // ─── Static Utilities ────────────────────────────────────────────

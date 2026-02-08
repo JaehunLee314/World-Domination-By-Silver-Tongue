@@ -20,17 +20,6 @@ namespace SilverTongue.Data
     }
 
     [System.Serializable]
-    public struct SkillData
-    {
-        public string skillName;
-        [TextArea(1, 3)]
-        public string description;
-        [TextArea(2, 5)]
-        public string promptModifier;
-        public ThinkingEffort thinkingEffort;
-    }
-
-    [System.Serializable]
     public struct EmotionSprite
     {
         public Emotion emotion;
@@ -51,9 +40,6 @@ namespace SilverTongue.Data
         [Header("Stats")]
         [Tooltip("Controls LLM token limit: Low (Mob), Medium (Elite), High (Boss)")]
         public ThinkingEffort thinkingEffort = ThinkingEffort.Medium;
-
-        [Header("Skills")]
-        public SkillData[] skills;
 
         [Header("Lore")]
         [TextArea(3, 10)]

@@ -60,8 +60,26 @@ namespace SilverTongue.BattleScene
             if (conditionPanelView != null)
             {
                 var state = _manager.State;
-                conditionPanelView.Initialize(state.PlayerConditions, state.OpponentConditions);
+                if (state.PlayerConditions != null && state.PlayerConditions.Length > 0)
+                {
+                    conditionPanelView.Initialize(state.PlayerConditions, state.OpponentConditions);
+                }
+                else
+                {
+                    conditionPanelView.Initialize(
+                        BuildConditions(player.loseConditions),
+                        BuildConditions(opponent.loseConditions));
+                }
             }
+        }
+
+        private static ConditionStatus[] BuildConditions(string[] conditions)
+        {
+            if (conditions == null) return System.Array.Empty<ConditionStatus>();
+            var result = new ConditionStatus[conditions.Length];
+            for (int i = 0; i < conditions.Length; i++)
+                result[i] = new ConditionStatus { Condition = conditions[i] };
+            return result;
         }
 
         private void UpdateTurnCounter()

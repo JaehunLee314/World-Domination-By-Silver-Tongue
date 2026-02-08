@@ -12,7 +12,6 @@ namespace SilverTongue.BattleScene
         [SerializeField] private Image profileImage;
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private TextMeshProUGUI loseConditionsText;
-        [SerializeField] private TextMeshProUGUI skillsText;
         [SerializeField] private Button selectButton;
 
         private CharacterSO _character;
@@ -31,14 +30,6 @@ namespace SilverTongue.BattleScene
                 conditions += $"- {character.loseConditions[i]}\n";
             }
             loseConditionsText.text = conditions.TrimEnd();
-
-            if (skillsText != null && character.skills != null)
-            {
-                string skills = "";
-                foreach (var skill in character.skills)
-                    skills += $"- {skill.skillName}: {skill.description}\n";
-                skillsText.text = skills.TrimEnd();
-            }
 
             if (character.profileImage != null)
                 profileImage.sprite = character.profileImage;
