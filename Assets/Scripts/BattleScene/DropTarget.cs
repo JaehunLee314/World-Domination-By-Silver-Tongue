@@ -50,7 +50,7 @@ namespace SilverTongue.BattleScene
         public void OnPointerExit(PointerEventData eventData)
         {
             if (_slotImage != null)
-                _slotImage.color = AssignedItem != null ? new Color(0.2f, 0.5f, 0.3f, 0.8f) : _originalColor;
+                _slotImage.color = _originalColor;
         }
 
         public void OnDrop(PointerEventData eventData)
@@ -89,9 +89,6 @@ namespace SilverTongue.BattleScene
             if (_slotLabel != null)
                 _slotLabel.text = item.itemName;
 
-            // Tint background to show it's filled
-            if (_slotImage != null)
-                _slotImage.color = new Color(0.2f, 0.5f, 0.3f, 0.8f);
         }
 
         public void OnPointerClick(PointerEventData eventData)

@@ -100,6 +100,18 @@ public class GeminiService : ILLMService
 
                 // Success!
                 var (content, thoughtSummary) = ParseResponse(webRequest.downloadHandler.text);
+
+                if (string.IsNullOrEmpty(content))
+                {
+                    Debug.LogWarning($"[GeminiService] Empty response content (attempt {attempt + 1}/{_maxRetries + 1})");
+                    OnApiError?.Invoke("Empty response");
+                    if (attempt < _maxRetries)
+                        continue;
+                    response.Success = false;
+                    response.Error = "Empty response (max retries exceeded)";
+                    return response;
+                }
+
                 response.Content = content;
                 response.ThoughtSummary = thoughtSummary;
                 response.Success = true;
