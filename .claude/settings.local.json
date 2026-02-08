@@ -18,7 +18,8 @@
       "mcp__UnityMCP__manage_scriptable_object",
       "mcp__UnityMCP__manage_prefabs",
       "Bash(python3:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(timeout /t 4 /nobreak)"
     ]
   }
 }
