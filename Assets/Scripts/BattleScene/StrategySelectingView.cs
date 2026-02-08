@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using SilverTongue.Data;
+using SilverTongue.BattleSystem;
 
 namespace SilverTongue.BattleScene
 {
@@ -17,8 +18,9 @@ namespace SilverTongue.BattleScene
         [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private Image opponentImage;
         [SerializeField] private TextMeshProUGUI opponentNameText;
-        [SerializeField] private TextMeshProUGUI playerLoseConditionsText;
-        [SerializeField] private TextMeshProUGUI opponentLoseConditionsText;
+
+        [Header("Condition Panel")]
+        [SerializeField] private ConditionPanelView conditionPanelView;
 
         [Header("Strategy Panel")]
         [SerializeField] private StrategyPanelUI strategyPanel;
@@ -55,18 +57,11 @@ namespace SilverTongue.BattleScene
             if (opponent.profileImage != null)
                 opponentImage.sprite = opponent.profileImage;
 
-            // Always show lose conditions
-            playerLoseConditionsText.text = FormatLoseConditions(player.loseConditions);
-            opponentLoseConditionsText.text = FormatLoseConditions(opponent.loseConditions);
-        }
-
-        private string FormatLoseConditions(string[] conditions)
-        {
-            if (conditions == null || conditions.Length == 0) return "";
-            string text = "<b>Must-Lose Conditions:</b>\n";
-            foreach (var cond in conditions)
-                text += $"- {cond}\n";
-            return text.TrimEnd();
+            if (conditionPanelView != null)
+            {
+                var state = _manager.State;
+                conditionPanelView.Initialize(state.PlayerConditions, state.OpponentConditions);
+            }
         }
 
         private void UpdateTurnCounter()

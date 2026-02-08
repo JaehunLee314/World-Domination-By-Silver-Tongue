@@ -17,6 +17,14 @@ MonoBehaviour:
   emotionSprites:
   - emotion: 0
     sprite: {fileID: 21300000, guid: 1dfe1fe86da84407a9068bacfbcfd2a5, type: 3}
+  - emotion: 1
+    sprite: {fileID: 21300000, guid: 81e60221c5f9f4ec7bc4979cacb4a4d6, type: 3}
+  - emotion: 2
+    sprite: {fileID: 21300000, guid: 2d93feec8c20948b08ebdbca189cdfac, type: 3}
+  - emotion: 3
+    sprite: {fileID: 21300000, guid: 9ecd4fa8329b94c85b9e994427f6fbc6, type: 3}
+  - emotion: 4
+    sprite: {fileID: 21300000, guid: e817d97e8a4c143cea8075b4588debdf, type: 3}
   thinkingEffort: 1
   skills: []
   lore: 'You are The Tin-Foil Prophet (real name: Kenji Sato). A Paranoid Conspiracy

@@ -25,10 +25,6 @@ namespace SilverTongue.BattleScene
                 ? TextAnchor.UpperLeft
                 : TextAnchor.UpperRight;
 
-            bubbleBackground.color = entry.IsPlayer
-                ? new Color(0.2f, 0.4f, 0.6f, 0.9f)
-                : new Color(0.5f, 0.2f, 0.2f, 0.9f);
-
             bool hasIndicator = !string.IsNullOrEmpty(entry.EvidenceUsed);
             indicatorContainer.SetActive(hasIndicator);
             if (hasIndicator)

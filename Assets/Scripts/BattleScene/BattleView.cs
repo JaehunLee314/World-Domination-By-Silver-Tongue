@@ -257,9 +257,9 @@ namespace SilverTongue.BattleScene
 
             var btnImg = autoProgressButton.GetComponent<Image>();
             if (btnImg != null)
-                btnImg.color = _isAutoProgress
-                    ? new Color(0.2f, 0.7f, 0.3f)
-                    : new Color(0.5f, 0.5f, 0.2f);
+                btnImg.color = _isAutoProgress // F8f546, A0AAA9
+                    ? new Color(0.63f, 0.67f, 0.66f)
+                    : new Color(0.98f, 0.96f, 0.27f);
 
             goToStrategyButton.interactable = !_isAutoProgress;
         }

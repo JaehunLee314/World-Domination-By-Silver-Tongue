@@ -16,7 +16,7 @@ namespace SilverTongue.BattleScene
             SetupSide(playerConditionRows, playerConditions);
             SetupSide(opponentConditionRows, opponentConditions);
         }
-
+    
         public void Refresh(ConditionStatus[] playerConditions, ConditionStatus[] opponentConditions)
         {
             UpdateSide(playerConditionRows, playerConditions);
