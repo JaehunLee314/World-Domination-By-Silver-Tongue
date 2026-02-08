@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f7fb95f60f2d41acd4da1b903eac3, type: 3}
+  m_Name: OldPhoto
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.ItemData
+  itemName: Old Park Photo
+  itemType: 1
+  icon: {fileID: 2800000, guid: 792d2b2907c286e428f9a9857d02011f, type: 3}
+  description: A nostalgic photo from before the gentrification.
+  pickupDialogue: {fileID: 11400000, guid: 0d0d05b4f506e7643a5c4fe78e8541ea, type: 2}

@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40fc9b5016aa1204392d41e373f95080, type: 3}
+  m_Name: MenheraIntro
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
+  lines:
+  - speakerName: Hana
+    text: 'Finally! Tokyo! '
+    emotion: 1
+  - speakerName: Hana
+    text: Wait... is this a park or a laboratory? It's so... clean. It's creepy.
+    emotion: 5
+  - speakerName: Me
+    text: This is a 'Smart Park'. They redesigned it last year to 'increase efficiency'
+      and 'minimize loitering'.
+    emotion: 0
+  - speakerName: Conspiracy Theorist
+    text: Don't step on the grass! The sensors will upload your biometric data to
+      the cloud instantly!
+    emotion: 2
+  - speakerName: Hana
+    text: Hey, look. There's someone over there. She looks... really messy for such
+      a shiny park.
+    emotion: 5
+  - speakerName: Me
+    text: "She\u2019s surrounded by empty cans and trash. The cleaning bots are just...
+      circling her but not getting close."
+    emotion: 0
+  - speakerName: Hana
+    text: "Is she crying? Wait, she\u2019s holding a smartphone and screaming at
+      it!"
+    emotion: 4
+  - speakerName: Luna
+    text: "WHY WON'T YOU REPLY?! I TOLD YOU I\u2019D DIE IF YOU IGNORED ME!"
+    emotion: 2
+  - speakerName: Conspiracy Theorist
+    text: A victim of the digital dopamine trap! Her brainwaves are being fried in
+      real-time!
+    emotion: 5
+  - speakerName: Hana
+    text: "H-Hey, are you okay? You\u2019re blocking the path, and those scary-looking
+      robots are starting to beep at us..."
+    emotion: 5
+  - speakerName: Luna
+    text: Are you from the Corp? Did they send you to delete my account?! GET AWAY
+      FROM ME, NORMIES!
+    emotion: 2
+  - speakerName: Me
+    text: Here we go again. Hana, get ready. This one's internal logic is even more
+      fractured than the train guy's.
+    emotion: 0

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40fc9b5016aa1204392d41e373f95080, type: 3}
+  m_Name: AIChatPickup
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
+  lines:
+  - speakerName: Me
+    text: 'A chat app is still running. "I''ll always be by your side, Luna." That
+      must be her name. '
+    emotion: 0
+  - speakerName: Me
+    text: "But these replies... they're identical. \"Prince_Bot\" is just looping
+      a script. She\u2019s pouring her heart out to a piece of code that doesn't
+      even listen. "
+    emotion: 0
+  - speakerName: Luna
+    text: Hey! You can't take my phone like that!
+    emotion: 2
