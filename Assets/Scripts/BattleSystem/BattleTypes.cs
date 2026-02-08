@@ -26,6 +26,7 @@ namespace SilverTongue.BattleSystem
         public string Timestamp;
         public bool IsPlayer;
         public string EvidenceUsed;
+        public Emotion Emotion;
     }
 
     public struct ParsedTags
@@ -33,6 +34,7 @@ namespace SilverTongue.BattleSystem
         public bool AcceptDefeat;
         public string EvidenceUsed;
         public string InnerThought;
+        public Emotion Emotion;
     }
 
     [System.Serializable]

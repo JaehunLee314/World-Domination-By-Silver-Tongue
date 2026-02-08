@@ -65,19 +65,19 @@ namespace SilverTongue.BattleSystem
 
             if (!string.IsNullOrWhiteSpace(strategy.StrategyText))
             {
-                sb.AppendLine("[PLAYER STRATEGY]:");
+                sb.AppendLine("PLAYER STRATEGY:");
                 sb.AppendLine(strategy.StrategyText);
                 sb.AppendLine();
             }
 
             if (strategy.Items != null && strategy.Items.Count > 0)
             {
-                sb.AppendLine("[EQUIPPED ITEMS]:");
+                sb.AppendLine("EQUIPPED ITEMS:");
                 foreach (var item in strategy.Items)
                 {
                     string injection = !string.IsNullOrWhiteSpace(item.factInjection)
                         ? item.factInjection
-                        : $"[ITEM: {item.itemName}] {item.description}";
+                        : $"(ITEM: {item.itemName}) {item.description}";
                     sb.AppendLine(injection);
                 }
                 sb.AppendLine();
@@ -85,11 +85,11 @@ namespace SilverTongue.BattleSystem
 
             sb.AppendLine("RULES:");
             sb.AppendLine($"- You are debating against {opponent.characterName} to persuade them.");
-            sb.AppendLine("- STRICTLY follow the [PLAYER STRATEGY].");
-            sb.AppendLine("- Use [EQUIPPED ITEMS] to prove your point.");
+            sb.AppendLine("- STRICTLY follow the PLAYER STRATEGY.");
+            sb.AppendLine("- Use EQUIPPED ITEMS to prove your point.");
             sb.AppendLine("- When using evidence, include the tag: <evidence_used=ID>");
             sb.AppendLine("- You may include <accept_defeat/> if you choose to concede.");
-            sb.AppendLine("- You may use <inner_thought>...</inner_thought> for private reasoning.");
+            sb.AppendLine("- End every response with <emotion>TAG</emotion> where TAG is one of: neutral, happy, angry, sad, surprised, concerned.");
             sb.AppendLine("- Keep responses to 1-2 sentences of dialogue only. No narration.");
             if (player.loseConditions != null && player.loseConditions.Length > 0)
             {
@@ -113,7 +113,7 @@ namespace SilverTongue.BattleSystem
             sb.AppendLine("- Stay in character. Defend your position.");
             sb.AppendLine("- React naturally to persuasive arguments and evidence presented.");
             sb.AppendLine("- You may include <accept_defeat/> if you choose to concede.");
-            sb.AppendLine("- You may use <inner_thought>...</inner_thought> for private reasoning.");
+            sb.AppendLine("- End every response with <emotion>TAG</emotion> where TAG is one of: neutral, happy, angry, sad, surprised, concerned.");
             sb.AppendLine("- Keep responses to 1-2 sentences of dialogue only. No narration.");
             if (opponent.loseConditions != null && opponent.loseConditions.Length > 0)
             {
@@ -162,11 +162,28 @@ namespace SilverTongue.BattleSystem
             var thoughtMatch = Regex.Match(raw, @"<inner_thought>(.*?)</inner_thought>", RegexOptions.Singleline);
             tags.InnerThought = thoughtMatch.Success ? thoughtMatch.Groups[1].Value.Trim() : null;
 
+            var emotionMatch = Regex.Match(raw, @"<emotion>(.*?)</emotion>", RegexOptions.IgnoreCase);
+            tags.Emotion = emotionMatch.Success ? ParseEmotion(emotionMatch.Groups[1].Value.Trim()) : Emotion.Neutral;
+
             string clean = raw;
             clean = Regex.Replace(clean, @"<accept_defeat\s*/>", "");
             clean = Regex.Replace(clean, @"<evidence_used=[^>]+>", "");
             clean = Regex.Replace(clean, @"<inner_thought>.*?</inner_thought>", "", RegexOptions.Singleline);
+            clean = Regex.Replace(clean, @"<emotion>.*?</emotion>", "", RegexOptions.IgnoreCase);
             return clean.Trim();
+        }
+
+        private static Emotion ParseEmotion(string value)
+        {
+            return value.ToLower() switch
+            {
+                "happy" => Emotion.Happy,
+                "angry" => Emotion.Angry,
+                "sad" => Emotion.Sad,
+                "surprised" => Emotion.Surprised,
+                "concerned" => Emotion.Concerned,
+                _ => Emotion.Neutral
+            };
         }
     }
 }

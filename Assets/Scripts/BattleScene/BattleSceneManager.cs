@@ -179,8 +179,10 @@ namespace SilverTongue.BattleScene
         {
             var player = SelectedBattler;
             var opp = opponent;
+            var strategy = _state.Strategy;
 
             _state.Reset(maxTurns, opponentMaxSanity, player.loseConditions, opp.loseConditions);
+            _state.SetStrategy(strategy);
 
             string playerPrompt = BattlerAgent.BuildPlayerPrompt(player, opp, _state.Strategy);
             string opponentPrompt = BattlerAgent.BuildOpponentPrompt(player, opp);
@@ -221,6 +223,7 @@ namespace SilverTongue.BattleScene
             string displayThought = !string.IsNullOrEmpty(thought) ? thought : tags.InnerThought;
 
             battleView.ShowDialogue(speaker, cleanText, displayThought);
+            battleView.UpdateEmotionSprite(isPlayer, tags.Emotion);
 
             string timestamp = string.IsNullOrEmpty(_currentPhaseLabel)
                 ? $"Turn {CurrentTurn}"
@@ -233,7 +236,8 @@ namespace SilverTongue.BattleScene
                 RawText = rawText,
                 Timestamp = timestamp,
                 IsPlayer = isPlayer,
-                EvidenceUsed = tags.EvidenceUsed
+                EvidenceUsed = tags.EvidenceUsed,
+                Emotion = tags.Emotion
             });
 
             return tags;
@@ -387,7 +391,8 @@ namespace SilverTongue.BattleScene
                 // else: judge already running from previous turn, skip
 
                 // Start player generation for next turn (runs during judge + user reading)
-                _pendingDialogueResponse = _playerAgent.GenerateResponse(_llmService);
+                if (!isLastTurn)
+                    _pendingDialogueResponse = _playerAgent.GenerateResponse(_llmService);
 
                 AdvanceTurn();
             }

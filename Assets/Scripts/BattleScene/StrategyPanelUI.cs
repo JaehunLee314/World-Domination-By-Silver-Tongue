@@ -38,12 +38,16 @@ namespace SilverTongue.BattleScene
         private void OnItemDroppedToSlot(ItemSO item)
         {
             if (!assignedItems.Contains(item))
+            {
                 assignedItems.Add(item);
+                Debug.Log($"[Strategy] Item equipped: {item.itemName} (total: {assignedItems.Count})");
+            }
         }
 
         private void OnItemRemovedFromSlot(ItemSO item)
         {
             assignedItems.Remove(item);
+            Debug.Log($"[Strategy] Item removed: {item.itemName} (total: {assignedItems.Count})");
         }
 
         public void ClearAll()
@@ -60,6 +64,10 @@ namespace SilverTongue.BattleScene
 
         public StrategyEntry CollectStrategy()
         {
+            Debug.Log($"[Strategy] Collecting strategy: \"{strategyText}\", items={assignedItems.Count}");
+            foreach (var item in assignedItems)
+                Debug.Log($"[Strategy]   - {item.itemName} ({item.itemId})");
+
             return new StrategyEntry
             {
                 StrategyText = strategyText,

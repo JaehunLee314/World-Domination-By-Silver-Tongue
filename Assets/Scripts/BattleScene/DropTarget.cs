@@ -63,6 +63,9 @@ namespace SilverTongue.BattleScene
             var item = draggable.InventoryItemUI.Item;
             if (CanAcceptItem != null && !CanAcceptItem(item)) return;
 
+            if (AssignedItem != null)
+                OnItemRemoved?.Invoke(AssignedItem);
+
             AssignedItem = item;
             UpdateVisuals(item);
             OnItemDropped?.Invoke(item);

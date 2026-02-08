@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using SilverTongue.Data;
 using SilverTongue.BattleSystem;
 
 namespace SilverTongue.BattleScene
@@ -122,6 +123,16 @@ namespace SilverTongue.BattleScene
             speakerNameText.text = isPlayer
                 ? _manager.SelectedBattler.characterName
                 : _manager.Opponent.characterName;
+        }
+
+        public void UpdateEmotionSprite(bool isPlayer, Emotion emotion)
+        {
+            var character = isPlayer ? _manager.SelectedBattler : _manager.Opponent;
+            var sprite = character.GetEmotionSprite(emotion);
+            if (isPlayer)
+                playerCharacterImage.sprite = sprite;
+            else
+                opponentCharacterImage.sprite = sprite;
         }
 
         // ─── Condition Panel ─────────────────────────────────────────────

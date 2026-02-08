@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 046af0c82335e4e8e8596357d89e7423, type: 3}
+  m_Name: Item_Coupon
+  m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
+  itemId: coupon
+  itemName: 500-yen Discount Coupon
+  itemImage: {fileID: 21300000, guid: babd17be194484efe81728e0a9c3179e, type: 3}
+  description: '[WILDCARD] An expired coupon for a free beef bowl topping.'
+  factInjection: '[ITEM EQUIPPED: Beef Bowl Coupon]\nFACT: A crumpled coupon for
+    a free egg topping at a beef bowl chain. It expired 3 months ago. It is your most
+    valuable possession.'
