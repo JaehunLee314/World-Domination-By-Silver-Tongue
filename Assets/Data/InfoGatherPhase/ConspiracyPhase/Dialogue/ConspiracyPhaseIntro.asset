@@ -15,22 +15,22 @@ MonoBehaviour:
   lines:
   - speakerName: Hana
     text: Look! The lights of Tokyo are starting to flicker in the distance! We're finally leaving that sleepy village behind.
-    emotion: 0
+    emotion: 1
   - speakerName: Me
     text: Yeah. But remember what the news said? Tokyo isn't just about lights anymore. Everything is run by 'The Tower' now.
     emotion: 0
   - speakerName: Hana
     text: Ugh, don't be such a buzzkill! So what if AI manages our schedules? As long as we work hard, we'll survive.
-    emotion: 3
+    emotion: 5
   - speakerName: Hana
     text: (Muttering to herself) ...Besides, I already proved I'm a hard worker... even if that stupid AI HR couldn't see it...
-    emotion: 2
+    emotion: 3
   - speakerName: Me
     text: Did you say something, Hana?
     emotion: 0
   - speakerName: Hana
     text: N-Nothing! Anyway, once we arrive, it's Persuasion Battles only! I won't let anyone look down on us country folks!
-    emotion: 3
+    emotion: 2
   - speakerName: Conspiracy Theorist
     text: (Screaming from the next car) CEASE YOUR CHATTER, COGS OF THE MACHINE!
     emotion: 1
@@ -39,10 +39,10 @@ MonoBehaviour:
     emotion: 4
   - speakerName: Conspiracy Theorist
     text: This train is a soul-harvesting vessel! If we cross the city line, the 5G towers will rewrite your DNA! I must stop it here!
-    emotion: 1
+    emotion: 2
   - speakerName: Hana
     text: (Falling over) Ouch! You crazy old man! Do you know how much these tickets cost?! I’ll kick your butt back to the Stone Age!
-    emotion: 1
+    emotion: 2
   - speakerName: Me
     text: Wait, Hana! Calm down. Look at him... he’s guarding the brake with something. If we rush him, he might do something even crazier.
     emotion: 0
@@ -51,4 +51,4 @@ MonoBehaviour:
     emotion: 0
   - speakerName: Hana
     text: Fine! But if he says one more word about my DNA, I'm not holding back! Check the area for anything we can use against his crazy logic!
-    emotion: 1
+    emotion: 2

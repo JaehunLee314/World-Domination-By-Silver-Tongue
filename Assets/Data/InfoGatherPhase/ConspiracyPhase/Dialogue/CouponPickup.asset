@@ -19,7 +19,7 @@ MonoBehaviour:
   - speakerName: Hana
     text: My Beef Bowl Coupon! It expired three months ago, but it's the only thing
       I have left!
-    emotion: 1
+    emotion: 5
   - speakerName: Me
     text: It's technically worthless, but your attachment to it is almost... impressive.
     emotion: 1
