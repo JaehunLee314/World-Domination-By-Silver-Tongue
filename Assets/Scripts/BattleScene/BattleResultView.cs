@@ -10,6 +10,7 @@ namespace SilverTongue.BattleScene
         [SerializeField] private TextMeshProUGUI resultText;
         [SerializeField] private TextMeshProUGUI resultDescriptionText;
         [SerializeField] private Button closeButton;
+        [SerializeField] private Button conversationLogButton;
 
         private BattleSceneManager _manager;
 
@@ -29,6 +30,12 @@ namespace SilverTongue.BattleScene
 
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseClicked);
+
+            if (conversationLogButton != null)
+            {
+                conversationLogButton.onClick.RemoveAllListeners();
+                conversationLogButton.onClick.AddListener(() => _manager.ShowConversationHistory());
+            }
         }
 
         private void OnCloseClicked()

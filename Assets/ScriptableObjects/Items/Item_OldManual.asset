@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
   itemId: manual
   itemName: 1998 Old Manual
-  itemImage: {fileID: 0}
+  itemImage: {fileID: 21300000, guid: 8d07a1e349de3465c955bbd793eff5de, type: 3}
   description: A dusty maintenance manual from 1998. Proves the train uses analog
     vacuum tubes.
   factInjection: '[ITEM: Old Maintenance Manual] FACT: A dusty manual. States the

@@ -49,11 +49,9 @@ namespace SilverTongue.BattleSystem
             var sb = new StringBuilder();
 
             sb.AppendLine($"You are {player.characterName}, a skilled debater.");
-            sb.AppendLine(player.systemPromptLore);
-            sb.AppendLine($"Your speaking style: {player.voiceTone}");
+            sb.AppendLine(player.lore);
             sb.AppendLine();
 
-            // Character skills
             if (player.skills != null && player.skills.Length > 0)
             {
                 sb.AppendLine("YOUR SKILLS:");
@@ -65,7 +63,6 @@ namespace SilverTongue.BattleSystem
                 sb.AppendLine();
             }
 
-            // Strategy from strategy phase
             if (!string.IsNullOrWhiteSpace(strategy.StrategyText))
             {
                 sb.AppendLine("[PLAYER STRATEGY]:");
@@ -73,7 +70,6 @@ namespace SilverTongue.BattleSystem
                 sb.AppendLine();
             }
 
-            // Evidence items — inject factInjection if available, fallback to description
             if (strategy.Items != null && strategy.Items.Count > 0)
             {
                 sb.AppendLine("[EQUIPPED ITEMS]:");
@@ -92,13 +88,14 @@ namespace SilverTongue.BattleSystem
             sb.AppendLine("- STRICTLY follow the [PLAYER STRATEGY].");
             sb.AppendLine("- Use [EQUIPPED ITEMS] to prove your point.");
             sb.AppendLine("- When using evidence, include the tag: <evidence_used=ID>");
+            sb.AppendLine("- You may include <accept_defeat/> if you choose to concede.");
+            sb.AppendLine("- You may use <inner_thought>...</inner_thought> for private reasoning.");
             sb.AppendLine("- Keep responses to 1-2 sentences of dialogue only. No narration.");
             if (player.loseConditions != null && player.loseConditions.Length > 0)
             {
-                sb.Append("- NEVER do any of these (instant loss):");
+                sb.AppendLine("- AVOID doing any of these (your lose conditions):");
                 foreach (var cond in player.loseConditions)
-                    sb.Append($" \"{cond}\",");
-                sb.AppendLine();
+                    sb.AppendLine($"  - \"{cond}\"");
             }
 
             return sb.ToString();
@@ -109,20 +106,20 @@ namespace SilverTongue.BattleSystem
             var sb = new StringBuilder();
 
             sb.AppendLine($"You are {opponent.characterName}.");
-            sb.AppendLine(opponent.systemPromptLore);
-            sb.AppendLine($"Your speaking style: {opponent.voiceTone}");
+            sb.AppendLine(opponent.lore);
             sb.AppendLine();
             sb.AppendLine("RULES:");
             sb.AppendLine($"- You are being debated by {player.characterName}.");
             sb.AppendLine("- Stay in character. Defend your position.");
             sb.AppendLine("- React naturally to persuasive arguments and evidence presented.");
+            sb.AppendLine("- You may include <accept_defeat/> if you choose to concede.");
+            sb.AppendLine("- You may use <inner_thought>...</inner_thought> for private reasoning.");
             sb.AppendLine("- Keep responses to 1-2 sentences of dialogue only. No narration.");
             if (opponent.loseConditions != null && opponent.loseConditions.Length > 0)
             {
-                sb.Append("- You lose if you do any of these:");
+                sb.AppendLine("- You lose if you do all of these:");
                 foreach (var cond in opponent.loseConditions)
-                    sb.Append($" \"{cond}\",");
-                sb.AppendLine();
+                    sb.AppendLine($"  - \"{cond}\"");
             }
 
             return sb.ToString();
@@ -148,10 +145,28 @@ namespace SilverTongue.BattleSystem
             return match.Success ? match.Groups[1].Value.Trim() : raw.Trim();
         }
 
-        public static string ParseTag(string text, string tagName)
+        /// <summary>
+        /// Strips all recognized XML tags from dialogue text.
+        /// Returns clean display text; extracted tag data is returned via out parameter.
+        /// </summary>
+        public static string StripXmlTags(string raw, out ParsedTags tags)
         {
-            var match = Regex.Match(text, $"<{tagName}=([^>]+)>");
-            return match.Success ? match.Groups[1].Value : null;
+            tags = new ParsedTags();
+            if (string.IsNullOrEmpty(raw)) return raw ?? "";
+
+            tags.AcceptDefeat = Regex.IsMatch(raw, @"<accept_defeat\s*/>");
+
+            var evMatch = Regex.Match(raw, @"<evidence_used=([^>]+)>");
+            tags.EvidenceUsed = evMatch.Success ? evMatch.Groups[1].Value : null;
+
+            var thoughtMatch = Regex.Match(raw, @"<inner_thought>(.*?)</inner_thought>", RegexOptions.Singleline);
+            tags.InnerThought = thoughtMatch.Success ? thoughtMatch.Groups[1].Value.Trim() : null;
+
+            string clean = raw;
+            clean = Regex.Replace(clean, @"<accept_defeat\s*/>", "");
+            clean = Regex.Replace(clean, @"<evidence_used=[^>]+>", "");
+            clean = Regex.Replace(clean, @"<inner_thought>.*?</inner_thought>", "", RegexOptions.Singleline);
+            return clean.Trim();
         }
     }
 }

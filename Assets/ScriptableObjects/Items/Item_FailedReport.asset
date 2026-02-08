@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
   itemId: inspection_report
   itemName: Failed Safety Report
-  itemImage: {fileID: 0}
+  itemImage: {fileID: 21300000, guid: 41eb57dd712124393bc52b8ebe0c1fc5, type: 3}
   description: Official document proving safety checks failed due to budget cuts,
     not a conspiracy.
   factInjection: '[ITEM: Failed Report] FACT: Document proves safety checks failed

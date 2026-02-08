@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
   itemId: coupon
   itemName: 50-yen Coupon
-  itemImage: {fileID: 0}
+  itemImage: {fileID: 21300000, guid: babd17be194484efe81728e0a9c3179e, type: 3}
   description: 'Expired beef bowl coupon. Your most valuable possession. RISK: Enemy
     mocks your poverty.'
   factInjection: '[ITEM: 50-yen Coupon] FACT: Expired beef bowl coupon. It is your

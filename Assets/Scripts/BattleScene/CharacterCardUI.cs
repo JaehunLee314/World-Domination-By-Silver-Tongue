@@ -11,8 +11,6 @@ namespace SilverTongue.BattleScene
         [Header("UI Elements")]
         [SerializeField] private Image profileImage;
         [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private TextMeshProUGUI personalityText;
-        [SerializeField] private TextMeshProUGUI intelligenceText;
         [SerializeField] private TextMeshProUGUI loseConditionsText;
         [SerializeField] private TextMeshProUGUI skillsText;
         [SerializeField] private Button selectButton;
@@ -26,8 +24,6 @@ namespace SilverTongue.BattleScene
             _onSelect = onSelect;
 
             nameText.text = character.characterName;
-            personalityText.text = character.personality;
-            intelligenceText.text = $"INT: {character.intelligence}";
 
             string conditions = "";
             for (int i = 0; i < character.loseConditions.Length; i++)

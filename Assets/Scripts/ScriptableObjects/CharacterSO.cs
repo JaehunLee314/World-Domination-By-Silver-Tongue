@@ -28,10 +28,6 @@ namespace SilverTongue.Data
         public Sprite profileImage;
 
         [Header("Stats")]
-        [TextArea(1, 3)]
-        public string personality;
-        [Range(1, 10)]
-        public int intelligence = 5;
         [Tooltip("Controls LLM token limit: Low (Mob), Medium (Elite), High (Boss)")]
         public ThinkingEffort thinkingEffort = ThinkingEffort.Medium;
 
@@ -40,8 +36,7 @@ namespace SilverTongue.Data
 
         [Header("Lore")]
         [TextArea(3, 10)]
-        public string systemPromptLore;
-        public string voiceTone;
+        public string lore;
 
         [Header("Lose Conditions")]
         [Tooltip("Phrases or behaviors that cause immediate failure")]

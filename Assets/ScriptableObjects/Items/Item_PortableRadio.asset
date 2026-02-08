@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
   itemId: radio
   itemName: Portable Radio
-  itemImage: {fileID: 0}
+  itemImage: {fileID: 21300000, guid: 0b13c54e9cebc433bb7f22d0c65922bb, type: 3}
   description: A portable radio that only plays static or Trot music. No strange
     signals.
   factInjection: '[ITEM: Portable Radio] FACT: When turned on, it only plays static

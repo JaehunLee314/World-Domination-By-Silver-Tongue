@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
   itemId: mom_letter
   itemName: Mom's Letter
-  itemImage: {fileID: 0}
+  itemImage: {fileID: 21300000, guid: 26a75063812e9409fbda72fb5df8a0f7, type: 3}
   description: A crumpled letter from home. Triggers guilt.
   factInjection: '[ITEM: Mom''s Letter] FACT: A crumpled letter from home. "My son...
     please come home. We miss you." (Triggers Guilt).'

@@ -11,18 +11,24 @@ namespace SilverTongue.BattleSystem
     public class JudgeAgent
     {
         private const string JudgeSystemPrompt =
-            "You are the Game Engine & Referee. " +
-            "Analyze the latest exchange in this debate, calculate Sanity Damage, and check Victory/Defeat Conditions. " +
+            "You are the impartial Judge in a persuasion battle. " +
+            "Analyze the conversation, determine whether specific lose conditions have been met, " +
+            "and assign sanity damage based on argument quality. " +
             "Output ONLY valid JSON.";
 
         public async Task<JudgeResult> Evaluate(
             ILLMService llm,
             IReadOnlyList<ConversationEntry> history,
-            CharacterSO opponent,
+            ConditionStatus[] playerUnmetConditions,
+            ConditionStatus[] opponentUnmetConditions,
+            string playerName,
+            string opponentName,
             int currentSanity,
             int maxSanity)
         {
-            string judgeMessage = BuildJudgePrompt(history, opponent, currentSanity, maxSanity);
+            string judgeMessage = BuildJudgePrompt(
+                history, playerUnmetConditions, opponentUnmetConditions,
+                playerName, opponentName, currentSanity, maxSanity);
 
             var request = new LLMRequest
             {
@@ -34,72 +40,104 @@ namespace SilverTongue.BattleSystem
             var response = await llm.GenerateResponseAsync(request);
 
             if (response.Success)
-                return ParseJudgeResult(response.Content, currentSanity);
+                return ParseJudgeResult(response.Content, playerUnmetConditions, opponentUnmetConditions);
 
             return new JudgeResult
             {
-                reasoning = "Judge evaluation failed.",
-                damage_type = "Ineffective",
-                damage_dealt = 0,
-                prophet_current_sanity = currentSanity,
-                status = BattleStatus.Ongoing
+                playerEval = new JudgeEvaluation { conditions = System.Array.Empty<ConditionStatus>() },
+                opponentEval = new JudgeEvaluation { conditions = System.Array.Empty<ConditionStatus>() },
+                damage = 0,
+                reasoning = "Judge evaluation failed."
             };
         }
 
-        // ─── Static Helpers ──────────────────────────────────────────────
+        // ─── Prompt Builder ─────────────────────────────────────────────
 
         public static string BuildJudgePrompt(
             IReadOnlyList<ConversationEntry> history,
-            CharacterSO opponent,
+            ConditionStatus[] playerUnmetConditions,
+            ConditionStatus[] opponentUnmetConditions,
+            string playerName,
+            string opponentName,
             int currentSanity,
             int maxSanity)
         {
             var sb = new StringBuilder();
+
             sb.AppendLine("[DIALOGUE HISTORY]");
             foreach (var entry in history)
             {
-                if (entry.SpeakerName == "JUDGE") continue;
-                sb.AppendLine($"[{entry.SpeakerName}]: {entry.SpeechText}");
+                string text = !string.IsNullOrEmpty(entry.RawText) ? entry.RawText : entry.SpeechText;
+                sb.AppendLine($"[{entry.SpeakerName}]: {text}");
             }
-
-            sb.AppendLine();
-            sb.AppendLine($"[CURRENT OPPONENT]: {opponent.characterName}");
-            sb.AppendLine($"[OPPONENT CURRENT SANITY]: {currentSanity}/{maxSanity}");
             sb.AppendLine();
 
-            sb.AppendLine("[LOSE CONDITIONS]:");
-            if (opponent.loseConditions != null)
+            sb.AppendLine($"[PLAYER: {playerName}]");
+            sb.AppendLine("[PLAYER UNMET LOSE CONDITIONS]:");
+            if (playerUnmetConditions != null && playerUnmetConditions.Length > 0)
             {
-                foreach (var cond in opponent.loseConditions)
-                    sb.AppendLine($"- {cond}");
+                for (int i = 0; i < playerUnmetConditions.Length; i++)
+                    sb.AppendLine($"  {i}: \"{playerUnmetConditions[i].Condition}\"");
             }
+            else
+            {
+                sb.AppendLine("  (none remaining)");
+            }
+            sb.AppendLine();
 
+            sb.AppendLine($"[OPPONENT: {opponentName}]");
+            sb.AppendLine("[OPPONENT UNMET LOSE CONDITIONS]:");
+            if (opponentUnmetConditions != null && opponentUnmetConditions.Length > 0)
+            {
+                for (int i = 0; i < opponentUnmetConditions.Length; i++)
+                    sb.AppendLine($"  {i}: \"{opponentUnmetConditions[i].Condition}\"");
+            }
+            else
+            {
+                sb.AppendLine("  (none remaining)");
+            }
             sb.AppendLine();
+
+            sb.AppendLine($"[OPPONENT SANITY]: {currentSanity}/{maxSanity}");
+            sb.AppendLine();
+
             sb.AppendLine("EVALUATION RULES:");
-            sb.AppendLine("1. LOGIC CHECK: Does the argument + Evidence directly satisfy a lose condition?");
-            sb.AppendLine("   - IF YES: Higher damage.");
-            sb.AppendLine("2. RISK CHECK: Did the opponent successfully trap the player (Hypocrisy/Worthlessness)?");
-            sb.AppendLine("   - IF YES: Heal opponent sanity instead.");
+            sb.AppendLine("- For each unmet condition, analyze the FULL conversation to determine if it has been met.");
+            sb.AppendLine("- A condition is met when the character clearly demonstrates the behavior/concession described.");
+            sb.AppendLine("- Be strict: vague hints or partial fulfillment do NOT count.");
+            sb.AppendLine("- Only evaluate conditions listed above. Do not invent new ones.");
             sb.AppendLine();
-            sb.AppendLine("SCORING:");
-            sb.AppendLine("- Ineffective (0): Insults without logic.");
-            sb.AppendLine("- Normal Hit (-20): Logical argument.");
-            sb.AppendLine("- Critical Hit (-50): Emotional/evidence-backed strike.");
-            sb.AppendLine("- Trap Trigger (+20 Heal to Enemy): Player falls for a trap.");
+
+            sb.AppendLine("DAMAGE GUIDELINES (to opponent sanity):");
+            sb.AppendLine("- 0: Arguments were ineffective or player fell into a trap.");
+            sb.AppendLine("- 10-20: Decent argument, some progress.");
+            sb.AppendLine("- 30-40: Strong argument backed by evidence or newly met condition.");
+            sb.AppendLine("- 50: Devastating argument, critical breakthrough.");
             sb.AppendLine();
+
             sb.AppendLine("OUTPUT JSON ONLY (no markdown, no code fences):");
             sb.AppendLine("{");
-            sb.AppendLine("  \"reasoning\": \"Step-by-step analysis.\",");
-            sb.AppendLine("  \"damage_type\": \"Ineffective | Normal Hit | Critical Hit | Trap Trigger\",");
-            sb.AppendLine("  \"damage_dealt\": <integer>,");
-            sb.AppendLine($"  \"prophet_current_sanity\": <calculated from {currentSanity}>,");
-            sb.AppendLine("  \"status\": \"ONGOING | PLAYER_WINS | OPPONENT_WINS\"");
+            sb.AppendLine("  \"player_conditions\": [");
+            sb.AppendLine("    { \"index\": 0, \"is_met\": true/false, \"reasoning\": \"...\" },");
+            sb.AppendLine("    ...");
+            sb.AppendLine("  ],");
+            sb.AppendLine("  \"opponent_conditions\": [");
+            sb.AppendLine("    { \"index\": 0, \"is_met\": true/false, \"reasoning\": \"...\" },");
+            sb.AppendLine("    ...");
+            sb.AppendLine("  ],");
+            sb.AppendLine("  \"damage\": <integer 0-50>,");
+            sb.AppendLine("  \"reasoning\": \"Overall assessment of this exchange.\"");
             sb.AppendLine("}");
 
             return sb.ToString();
         }
 
-        public static JudgeResult ParseJudgeResult(string raw, int currentSanity)
+        // ─── Parser ──────────────────────────────────────────────────────
+
+        public static JudgeResult ParseJudgeResult(
+            string raw,
+            ConditionStatus[] playerUnmetConditions,
+            ConditionStatus[] opponentUnmetConditions)
         {
             raw = raw.Trim();
             if (raw.StartsWith("```"))
@@ -109,48 +147,73 @@ namespace SilverTongue.BattleSystem
                 raw = raw.Trim();
             }
 
+            var result = new JudgeResult
+            {
+                playerEval = new JudgeEvaluation
+                {
+                    conditions = new ConditionStatus[playerUnmetConditions?.Length ?? 0]
+                },
+                opponentEval = new JudgeEvaluation
+                {
+                    conditions = new ConditionStatus[opponentUnmetConditions?.Length ?? 0]
+                },
+                damage = 0,
+                reasoning = ""
+            };
+
             try
             {
-                return JsonUtility.FromJson<JudgeResult>(raw);
+                var dmgMatch = Regex.Match(raw, @"""damage""\s*:\s*(-?\d+)");
+                if (dmgMatch.Success) int.TryParse(dmgMatch.Groups[1].Value, out result.damage);
+
+                var reasonMatch = Regex.Match(raw, @"""reasoning""\s*:\s*""((?:[^""\\]|\\.)*)""");
+                if (reasonMatch.Success) result.reasoning = reasonMatch.Groups[1].Value;
+
+                ParseConditionArray(raw, "player_conditions", playerUnmetConditions, result.playerEval.conditions);
+                ParseConditionArray(raw, "opponent_conditions", opponentUnmetConditions, result.opponentEval.conditions);
             }
-            catch
+            catch (System.Exception e)
             {
-                Debug.LogWarning($"[JudgeAgent] Failed to parse judge JSON: {raw}");
-
-                int damage = 0;
-                var dmgMatch = Regex.Match(raw, @"""damage_dealt""\s*:\s*(-?\d+)");
-                if (dmgMatch.Success) int.TryParse(dmgMatch.Groups[1].Value, out damage);
-
-                string status = BattleStatus.Ongoing;
-                if (raw.Contains(BattleStatus.PlayerWins)) status = BattleStatus.PlayerWins;
-                else if (raw.Contains(BattleStatus.OpponentWins)) status = BattleStatus.OpponentWins;
-
-                string damageType = "Ineffective";
-                if (raw.Contains("Critical Hit")) damageType = "Critical Hit";
-                else if (raw.Contains("Normal Hit")) damageType = "Normal Hit";
-                else if (raw.Contains("Trap Trigger")) damageType = "Trap Trigger";
-
-                return new JudgeResult
-                {
-                    reasoning = "Parsed from partial response.",
-                    damage_type = damageType,
-                    damage_dealt = damage,
-                    prophet_current_sanity = currentSanity - damage,
-                    status = status
-                };
+                Debug.LogWarning($"[JudgeAgent] Failed to parse judge JSON: {e.Message}\n{raw}");
             }
+
+            return result;
         }
 
-        public static bool CheckLoseConditions(string[] conditions, string dialogue)
+        private static void ParseConditionArray(
+            string raw, string arrayName,
+            ConditionStatus[] unmetConditions,
+            ConditionStatus[] output)
         {
-            if (conditions == null) return false;
-            foreach (var cond in conditions)
+            if (unmetConditions == null || output == null) return;
+
+            var arrayMatch = Regex.Match(raw,
+                $@"""{arrayName}""\s*:\s*\[(.*?)\]",
+                RegexOptions.Singleline);
+            if (!arrayMatch.Success) return;
+
+            string arrayContent = arrayMatch.Groups[1].Value;
+
+            var entryMatches = Regex.Matches(arrayContent,
+                @"\{\s*""index""\s*:\s*(\d+)\s*,\s*""is_met""\s*:\s*(true|false)\s*,\s*""reasoning""\s*:\s*""((?:[^""\\]|\\.)*)""[^}]*\}",
+                RegexOptions.Singleline);
+
+            foreach (Match m in entryMatches)
             {
-                if (string.IsNullOrWhiteSpace(cond)) continue;
-                if (Regex.IsMatch(dialogue, Regex.Escape(cond), RegexOptions.IgnoreCase))
-                    return true;
+                if (!int.TryParse(m.Groups[1].Value, out int index)) continue;
+                if (index < 0 || index >= output.Length) continue;
+
+                bool isMet = m.Groups[2].Value == "true";
+                string reasoning = m.Groups[3].Value;
+
+                output[index] = new ConditionStatus
+                {
+                    Condition = unmetConditions[index].Condition,
+                    IsMet = isMet,
+                    Reasoning = reasoning,
+                    MetOnTurn = 0
+                };
             }
-            return false;
         }
     }
 }

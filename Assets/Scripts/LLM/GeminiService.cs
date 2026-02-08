@@ -46,7 +46,9 @@ public class GeminiService : ILLMService
                 }
 
                 OnApiStatusChanged?.Invoke($"Calling API (attempt {attempt + 1})...");
-                Debug.Log($"[GeminiService] Sending request to {_modelName} (attempt {attempt + 1})...");
+                Debug.Log($"[GeminiService] Sending request to {_modelName} (attempt {attempt + 1})");
+                Debug.Log($"[GeminiService] URL: {url}");
+                Debug.Log($"[GeminiService] Request payload:\n{jsonPayload}");
 
                 using var webRequest = new UnityWebRequest(url, "POST");
                 byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
@@ -64,6 +66,9 @@ public class GeminiService : ILLMService
 
                 response.RawResponse = webRequest.downloadHandler.text;
                 long responseCode = webRequest.responseCode;
+
+                Debug.Log($"[GeminiService] Response code: {responseCode}");
+                Debug.Log($"[GeminiService] Raw response:\n{response.RawResponse}");
 
                 // Check for retryable errors (503, 429, 500)
                 if (responseCode == 503 || responseCode == 429 || responseCode == 500)
@@ -99,8 +104,8 @@ public class GeminiService : ILLMService
                 response.ThoughtSummary = thoughtSummary;
                 response.Success = true;
                 OnApiStatusChanged?.Invoke("API OK");
-                Debug.Log($"[GeminiService] Response received ({response.Content.Length} chars, thought: {thoughtSummary?.Length ?? 0} chars)");
-                Debug.Log($"[GeminiService] Full Response: {response.RawResponse}");
+                Debug.Log($"[GeminiService] Parsed content ({content.Length} chars):\n{content}");
+                Debug.Log($"[GeminiService] Parsed thought ({thoughtSummary?.Length ?? 0} chars):\n{thoughtSummary}");
                 return response;
             }
             catch (Exception ex)

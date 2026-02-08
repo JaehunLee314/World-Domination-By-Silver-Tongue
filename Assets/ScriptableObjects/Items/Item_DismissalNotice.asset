@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
   itemId: dismissal_notice
   itemName: Dismissal Notice
-  itemImage: {fileID: 0}
+  itemImage: {fileID: 21300000, guid: 51a790a8c7e3046af882282a54e240f0, type: 3}
   description: Official email stating you were fired by an AI emoji. You are a victim,
     not an agent.
   factInjection: '[ITEM: Dismissal Notice] FACT: Official email stating you were

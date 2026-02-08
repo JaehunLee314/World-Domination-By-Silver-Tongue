@@ -21,24 +21,42 @@ namespace SilverTongue.BattleSystem
     public struct ConversationEntry
     {
         public string SpeakerName;
-        public string SpeechText;
+        public string SpeechText;      // Clean display text (tags stripped)
+        public string RawText;         // Original text with tags (for judge context)
         public string Timestamp;
         public bool IsPlayer;
         public string EvidenceUsed;
+    }
 
-        // Judge evaluation data (only set on JUDGE entries)
-        public string DamageType;    // "Ineffective", "Normal Hit", "Critical Hit", "Trap Trigger"
-        public int DamageDealt;
+    public struct ParsedTags
+    {
+        public bool AcceptDefeat;
+        public string EvidenceUsed;
+        public string InnerThought;
+    }
+
+    [System.Serializable]
+    public struct ConditionStatus
+    {
+        public string Condition;    // Text from CharacterSO.loseConditions
+        public bool IsMet;
+        public string Reasoning;    // Judge's explanation for why it is met
+        public int MetOnTurn;       // Turn number when condition was met (0 = not met)
+    }
+
+    [System.Serializable]
+    public struct JudgeEvaluation
+    {
+        public ConditionStatus[] conditions;
     }
 
     [System.Serializable]
     public struct JudgeResult
     {
-        public string reasoning;
-        public string damage_type;    // "Ineffective", "Normal Hit", "Critical Hit", "Trap Trigger"
-        public int damage_dealt;
-        public int prophet_current_sanity;
-        public string status;         // BattleStatus.Ongoing, BattleStatus.PlayerWins, BattleStatus.OpponentWins
+        public JudgeEvaluation playerEval;
+        public JudgeEvaluation opponentEval;
+        public int damage;          // Damage to opponent sanity
+        public string reasoning;    // Overall reasoning
     }
 
     public static class BattleStatus

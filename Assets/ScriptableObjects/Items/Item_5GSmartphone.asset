@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilverTongue.Data.ItemSO
   itemId: smartphone
   itemName: 5G Smartphone
-  itemImage: {fileID: 0}
+  itemImage: {fileID: 21300000, guid: bd31a28f893c14c05aa1c307ee8970cf, type: 3}
   description: 'Your phone has full 5G bars. RISK: Enemy points out hypocrisy - you
     use 5G too!'
   factInjection: '[ITEM: 5G Smartphone] FACT: Your phone has full 5G bars and is

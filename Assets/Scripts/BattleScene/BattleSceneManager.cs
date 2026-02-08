@@ -36,29 +36,27 @@ namespace SilverTongue.BattleScene
         private bool _isPausedFromBattle;
         private readonly BattleState _state = new BattleState();
 
-        // Battle loop state (owned by manager, not view)
+        // Battle loop state
         private BattlerAgent _playerAgent;
         private BattlerAgent _opponentAgent;
         private JudgeAgent _judgeAgent;
         private bool _isBattleActive;
+        private bool _playerWon;
         private string _currentPhaseLabel = "";
+        private Task<JudgeResult> _pendingJudgeTask;
+        private Task<LLMResponse> _pendingDialogueResponse;
 
         public BattleState State => _state;
         public CharacterSO SelectedBattler { get; private set; }
         public CharacterSO Opponent => opponent;
         public int CurrentTurn => _state.CurrentTurn;
         public int MaxTurns => _state.MaxTurns;
-        public int OpponentMaxSanity => _state.OpponentMaxSanity;
-        public int OpponentCurrentSanity => _state.OpponentCurrentSanity;
         public ILLMService LLMService => _llmService;
         public bool IsPausedFromBattle => _isPausedFromBattle;
         public IReadOnlyList<ConversationEntry> ConversationHistory => _state.ConversationHistory;
         public StrategyEntry Strategy => _state.Strategy;
-        public JudgeResult LastJudgeResult => _state.LastJudgeResult;
 
         public void SetStrategy(StrategyEntry strategy) => _state.SetStrategy(strategy);
-        public int ApplyDamage(int damage) => _state.ApplyDamage(damage);
-        public void SetLastJudgeResult(JudgeResult result) => _state.SetLastJudgeResult(result);
         public void AdvanceTurn() => _state.AdvanceTurn();
         public void AddConversationEntry(ConversationEntry entry) => _state.AddConversationEntry(entry);
 
@@ -66,12 +64,10 @@ namespace SilverTongue.BattleScene
         {
             InitializeLLMService();
 
-            // Use opponent from GameManager if set (game loop flow),
-            // otherwise fall back to serialized field (standalone testing)
             if (GameManager.Instance != null && GameManager.Instance.currentOpponent != null)
                 opponent = GameManager.Instance.currentOpponent;
 
-            _state.Reset(maxTurns, opponentMaxSanity);
+            _state.Reset(maxTurns, opponentMaxSanity, null, null);
 
             if (conversationHistoryCanvas != null)
                 conversationHistoryCanvas.SetActive(false);
@@ -113,7 +109,7 @@ namespace SilverTongue.BattleScene
                     StartBattle();
                     break;
                 case BattlePhase.BattleResult:
-                    battleResultView.Initialize(this, _state.OpponentCurrentSanity <= 0);
+                    battleResultView.Initialize(this, _playerWon);
                     break;
             }
         }
@@ -132,12 +128,13 @@ namespace SilverTongue.BattleScene
         public void OnBattleFinished(bool playerWon)
         {
             _isBattleActive = false;
+            _playerWon = playerWon;
             SwitchPhase(BattlePhase.BattleResult);
         }
 
         public void ReturnToBattlerSelection()
         {
-            _state.Reset(maxTurns, opponentMaxSanity);
+            _state.Reset(maxTurns, opponentMaxSanity, null, null);
             SwitchPhase(BattlePhase.BattlerSelecting);
         }
 
@@ -176,12 +173,14 @@ namespace SilverTongue.BattleScene
             ResumeBattle();
         }
 
-        // ─── Battle Logic (migrated from BattleView) ────────────────────
+        // ─── Battle Logic ────────────────────────────────────────────────
 
         private void StartBattle()
         {
             var player = SelectedBattler;
             var opp = opponent;
+
+            _state.Reset(maxTurns, opponentMaxSanity, player.loseConditions, opp.loseConditions);
 
             string playerPrompt = BattlerAgent.BuildPlayerPrompt(player, opp, _state.Strategy);
             string opponentPrompt = BattlerAgent.BuildOpponentPrompt(player, opp);
@@ -190,8 +189,11 @@ namespace SilverTongue.BattleScene
             _opponentAgent = new BattlerAgent(opp, opponentPrompt, opp.thinkingEffort.ToString().ToLower());
             _judgeAgent = new JudgeAgent();
             _isBattleActive = true;
+            _pendingJudgeTask = null;
+            _pendingDialogueResponse = null;
 
             battleView.Initialize(this);
+            battleView.InitializeConditionPanel(_state);
             RunAutoBattle();
         }
 
@@ -202,12 +204,24 @@ namespace SilverTongue.BattleScene
                 BattlerAgent.BuildPlayerPrompt(SelectedBattler, opponent, _state.Strategy));
 
             battleView.Resume();
+
+            // Pre-start player generation so it runs while user reads/clicks
+            _pendingDialogueResponse = _playerAgent.GenerateResponse(_llmService);
             ContinueAutoBattle();
         }
 
-        private void RecordDialogue(string speaker, string text, bool isPlayer,
-            string evidenceUsed = null, string damageType = null, int damageDealt = 0)
+        /// <summary>
+        /// Strips XML tags, displays clean text, records both clean and raw to history.
+        /// Returns parsed tags so caller can check AcceptDefeat.
+        /// </summary>
+        private ParsedTags DisplayAndRecord(string speaker, string rawText, string thought, bool isPlayer)
         {
+            string cleanText = BattlerAgent.StripXmlTags(rawText, out var tags);
+
+            string displayThought = !string.IsNullOrEmpty(thought) ? thought : tags.InnerThought;
+
+            battleView.ShowDialogue(speaker, cleanText, displayThought);
+
             string timestamp = string.IsNullOrEmpty(_currentPhaseLabel)
                 ? $"Turn {CurrentTurn}"
                 : $"Turn {CurrentTurn} ({_currentPhaseLabel})";
@@ -215,44 +229,35 @@ namespace SilverTongue.BattleScene
             AddConversationEntry(new ConversationEntry
             {
                 SpeakerName = speaker,
-                SpeechText = text,
+                SpeechText = cleanText,
+                RawText = rawText,
                 Timestamp = timestamp,
                 IsPlayer = isPlayer,
-                EvidenceUsed = evidenceUsed,
-                DamageType = damageType,
-                DamageDealt = damageDealt
+                EvidenceUsed = tags.EvidenceUsed
             });
+
+            return tags;
         }
 
-        private void DisplayAndRecord(string speaker, string text, string thought, bool isPlayer)
-        {
-            battleView.ShowDialogue(speaker, text, thought);
-            RecordDialogue(speaker, text, isPlayer,
-                evidenceUsed: BattlerAgent.ParseTag(text, "evidence_used"));
-        }
-
-        private int CalculateActualDamage(JudgeResult result)
-        {
-            if (result.damage_type == "Trap Trigger")
-                return -Mathf.Abs(result.damage_dealt);
-            return Mathf.Abs(result.damage_dealt);
-        }
-
-        // ─── Auto-Battle Loop ───────────────────────────────────────────
+        // ─── Auto-Battle Loop ────────────────────────────────────────────
 
         private async void RunAutoBattle()
         {
-            // Opponent opening
-            _currentPhaseLabel = "Opening";
-            battleView.UpdateTurnTracker("Opening");
+            // Opponent opening — start generation before user clicks
             _opponentAgent.AddToHistory("user", "The debate begins. State your opening position.");
 
+            var opponentTask = _opponentAgent.GenerateResponse(_llmService);
+
+            _currentPhaseLabel = "Opening";
+            battleView.UpdateTurnTracker("Opening");
             battleView.SetSpeaker(false);
             await battleView.MovePanelForwardAsync(false);
             if (!_isBattleActive) return;
 
-            battleView.ShowThinking(opponent.characterName);
-            var opponentResponse = await _opponentAgent.GenerateResponse(_llmService);
+            if (!opponentTask.IsCompleted)
+                battleView.ShowThinking(opponent.characterName);
+
+            var opponentResponse = await opponentTask;
             if (!_isBattleActive) return;
 
             if (opponentResponse.Success)
@@ -260,14 +265,17 @@ namespace SilverTongue.BattleScene
                 string content = BattlerAgent.CleanDialogue(opponentResponse.Content);
                 _opponentAgent.AddToHistory("model", content);
                 _playerAgent.AddToHistory("user", content);
-                DisplayAndRecord(opponent.characterName, content, opponentResponse.ThoughtSummary, false);
+                var tags = DisplayAndRecord(opponent.characterName, content, opponentResponse.ThoughtSummary, false);
+
+                if (tags.AcceptDefeat)
+                {
+                    OnBattleFinished(true);
+                    return;
+                }
             }
 
-            await battleView.MovePanelBackAsync(false);
-            if (!_isBattleActive) return;
-
-            await battleView.WaitForInputAsync();
-            if (!_isBattleActive) return;
+            // Pre-start player generation for first turn
+            _pendingDialogueResponse = _playerAgent.GenerateResponse(_llmService);
 
             await RunBattleLoop();
         }
@@ -279,17 +287,29 @@ namespace SilverTongue.BattleScene
 
         private async Task RunBattleLoop()
         {
+            // Pre-condition: _pendingDialogueResponse holds player's in-progress generation
+            // Pre-condition: previous speaker (opponent) panel is forward
+
             while (_isBattleActive && CurrentTurn <= MaxTurns)
             {
-                // ── Player's turn ──
+                // ── Apply any completed background judge from previous turn ──
+                TryApplyPendingJudgeResult();
+                if (!_isBattleActive) return;
+
+                // ── Player's turn (generation already in progress) ──
+                await battleView.WaitForInputAsync();
+                if (!_isBattleActive) return;
+
                 _currentPhaseLabel = "My Turn";
                 battleView.UpdateTurnTracker("My Turn");
                 battleView.SetSpeaker(true);
-                await battleView.MovePanelForwardAsync(true);
+                await battleView.TransitionSpeakersAsync(false); // opponent back + player forward
                 if (!_isBattleActive) return;
 
-                battleView.ShowThinking(SelectedBattler.characterName);
-                var playerResponse = await _playerAgent.GenerateResponse(_llmService);
+                if (!_pendingDialogueResponse.IsCompleted)
+                    battleView.ShowThinking(SelectedBattler.characterName);
+
+                var playerResponse = await _pendingDialogueResponse;
                 if (!_isBattleActive) return;
 
                 if (playerResponse.Success)
@@ -297,38 +317,33 @@ namespace SilverTongue.BattleScene
                     string playerContent = BattlerAgent.CleanDialogue(playerResponse.Content);
                     _playerAgent.AddToHistory("model", playerContent);
                     _opponentAgent.AddToHistory("user", playerContent);
-                    DisplayAndRecord(SelectedBattler.characterName, playerContent, playerResponse.ThoughtSummary, true);
+                    var playerTags = DisplayAndRecord(
+                        SelectedBattler.characterName, playerContent, playerResponse.ThoughtSummary, true);
 
-                    if (JudgeAgent.CheckLoseConditions(SelectedBattler.loseConditions, playerContent))
+                    if (playerTags.AcceptDefeat)
                     {
-                        battleView.ShowDialogue("JUDGE", "Player triggered a lose condition!", null);
-                        RecordDialogue("JUDGE", "Player triggered a lose condition!", false);
-                        SetLastJudgeResult(new JudgeResult
-                        {
-                            damage_type = "Trap Trigger",
-                            status = BattleStatus.OpponentWins,
-                            reasoning = "Player triggered a lose condition."
-                        });
                         OnBattleFinished(false);
                         return;
                     }
                 }
 
-                await battleView.MovePanelBackAsync(true);
-                if (!_isBattleActive) return;
+                // Start opponent generation immediately (runs while user reads)
+                _pendingDialogueResponse = _opponentAgent.GenerateResponse(_llmService);
 
+                // ── Opponent's turn (generation already in progress) ──
                 await battleView.WaitForInputAsync();
                 if (!_isBattleActive) return;
 
-                // ── Opponent's turn ──
                 _currentPhaseLabel = "Opponent's Turn";
                 battleView.UpdateTurnTracker("Opponent's Turn");
                 battleView.SetSpeaker(false);
-                await battleView.MovePanelForwardAsync(false);
+                await battleView.TransitionSpeakersAsync(true); // player back + opponent forward
                 if (!_isBattleActive) return;
 
-                battleView.ShowThinking(opponent.characterName);
-                var opponentResponse = await _opponentAgent.GenerateResponse(_llmService);
+                if (!_pendingDialogueResponse.IsCompleted)
+                    battleView.ShowThinking(opponent.characterName);
+
+                var opponentResponse = await _pendingDialogueResponse;
                 if (!_isBattleActive) return;
 
                 if (opponentResponse.Success)
@@ -336,126 +351,116 @@ namespace SilverTongue.BattleScene
                     string opponentContent = BattlerAgent.CleanDialogue(opponentResponse.Content);
                     _opponentAgent.AddToHistory("model", opponentContent);
                     _playerAgent.AddToHistory("user", opponentContent);
-                    DisplayAndRecord(opponent.characterName, opponentContent, opponentResponse.ThoughtSummary, false);
+                    var opponentTags = DisplayAndRecord(
+                        opponent.characterName, opponentContent, opponentResponse.ThoughtSummary, false);
 
-                    if (JudgeAgent.CheckLoseConditions(opponent.loseConditions, opponentContent))
+                    if (opponentTags.AcceptDefeat)
                     {
-                        battleView.ShowDialogue("JUDGE", "Opponent triggered a lose condition! Player wins!", null);
-                        RecordDialogue("JUDGE", "Opponent triggered a lose condition! Player wins!", false);
-                        ApplyDamage(OpponentCurrentSanity);
-                        battleView.UpdateSanityBar();
-                        SetLastJudgeResult(new JudgeResult
-                        {
-                            damage_type = "Critical Hit",
-                            status = BattleStatus.PlayerWins,
-                            reasoning = "Opponent triggered a lose condition."
-                        });
                         OnBattleFinished(true);
                         return;
                     }
                 }
 
-                await battleView.MovePanelBackAsync(false);
-                if (!_isBattleActive) return;
+                // ── Background Judge Evaluation ──
+                bool isLastTurn = CurrentTurn >= MaxTurns;
 
-                await battleView.WaitForInputAsync();
-                if (!_isBattleActive) return;
-
-                // ── Judge Evaluation ──
-                _currentPhaseLabel = "Judge";
-                battleView.UpdateTurnTracker("Judge");
-                battleView.SetJudgeSpeaker();
-
-                battleView.ShowThinking("JUDGE");
-                var judgeResult = await _judgeAgent.Evaluate(
-                    _llmService,
-                    ConversationHistory,
-                    opponent,
-                    OpponentCurrentSanity,
-                    OpponentMaxSanity);
-                if (!_isBattleActive) return;
-
-                SetLastJudgeResult(judgeResult);
-
-                int actualDamage = CalculateActualDamage(judgeResult);
-                ApplyDamage(actualDamage);
-                battleView.UpdateSanityBar();
-
-                // Show judge feedback
-                string dmgSign = actualDamage >= 0 ? "-" : "+";
-                string judgeFeedback = $"{judgeResult.damage_type}! ({dmgSign}{Mathf.Abs(actualDamage)} Sanity) " +
-                    $"[{OpponentCurrentSanity}/{OpponentMaxSanity}]";
-                battleView.ShowJudgeDialogue(judgeFeedback, judgeResult);
-                RecordDialogue("JUDGE", judgeFeedback, false,
-                    damageType: judgeResult.damage_type, damageDealt: judgeResult.damage_dealt);
-
-                // Check win/loss from judge
-                if (judgeResult.status == BattleStatus.PlayerWins || OpponentCurrentSanity <= 0)
+                if (isLastTurn)
                 {
-                    battleView.ShowDialogue("JUDGE", $"CONFIRMED: {opponent.characterName} BROKEN!", null);
-                    RecordDialogue("JUDGE", $"CONFIRMED: {opponent.characterName} BROKEN!", false);
-                    OnBattleFinished(true);
-                    return;
+                    // Last turn: must resolve everything before ending
+                    if (_pendingJudgeTask != null)
+                    {
+                        await _pendingJudgeTask;
+                        TryApplyPendingJudgeResult();
+                        if (!_isBattleActive) return;
+                    }
+                    // Fire judge for this turn and await it
+                    FireJudgeInBackground();
+                    await _pendingJudgeTask;
+                    TryApplyPendingJudgeResult();
+                    if (!_isBattleActive) return;
                 }
-                if (judgeResult.status == BattleStatus.OpponentWins)
+                else if (_pendingJudgeTask == null)
                 {
-                    battleView.ShowDialogue("JUDGE", "CONTRACT SIGNED: YOU LOSE!", null);
-                    RecordDialogue("JUDGE", "CONTRACT SIGNED: YOU LOSE!", false);
-                    OnBattleFinished(false);
-                    return;
+                    // No judge running — fire one in background
+                    FireJudgeInBackground();
                 }
+                // else: judge already running from previous turn, skip
 
-                await battleView.WaitForInputAsync();
-                if (!_isBattleActive) return;
+                // Start player generation for next turn (runs during judge + user reading)
+                _pendingDialogueResponse = _playerAgent.GenerateResponse(_llmService);
 
                 AdvanceTurn();
             }
 
-            // Max turns reached — final verdict
+            // Max turns reached — resolve any pending judge before timeout decision
+            if (_isBattleActive && _pendingJudgeTask != null)
+            {
+                await _pendingJudgeTask;
+                TryApplyPendingJudgeResult();
+            }
             if (_isBattleActive)
             {
-                await RunFinalVerdict();
+                OnBattleFinished(false);
             }
         }
 
-        private async Task RunFinalVerdict()
-        {
-            _currentPhaseLabel = "Final Verdict";
-            battleView.UpdateTurnTracker("Final Verdict");
-            battleView.SetJudgeSpeaker();
-            battleView.ShowDialogue("JUDGE", "Maximum turns reached. Delivering final verdict...", null);
-            RecordDialogue("JUDGE", "Maximum turns reached. Delivering final verdict...", false);
-            battleView.ShowThinking("JUDGE");
+        // ─── Async Judge Helpers ────────────────────────────────────────
 
-            var judgeResult = await _judgeAgent.Evaluate(
+        private void FireJudgeInBackground()
+        {
+            _pendingJudgeTask = _judgeAgent.Evaluate(
                 _llmService,
                 ConversationHistory,
-                opponent,
-                OpponentCurrentSanity,
-                OpponentMaxSanity);
-            if (!_isBattleActive) return;
+                _state.GetUnmetConditions(true),
+                _state.GetUnmetConditions(false),
+                SelectedBattler.characterName,
+                opponent.characterName,
+                _state.OpponentCurrentSanity,
+                _state.OpponentMaxSanity);
+        }
 
-            SetLastJudgeResult(judgeResult);
+        private void TryApplyPendingJudgeResult()
+        {
+            if (_pendingJudgeTask == null || !_pendingJudgeTask.IsCompleted)
+                return;
 
-            if (judgeResult.damage_dealt != 0)
+            if (_pendingJudgeTask.IsFaulted)
             {
-                int actualDamage = CalculateActualDamage(judgeResult);
-                ApplyDamage(actualDamage);
-                battleView.UpdateSanityBar();
+                Debug.LogWarning($"[Judge] Background judge failed: {_pendingJudgeTask.Exception}");
+                _pendingJudgeTask = null;
+                return;
             }
 
-            // Below 50% sanity = player wins on timeout
-            bool playerWon = OpponentCurrentSanity <= 0
-                || judgeResult.status == BattleStatus.PlayerWins
-                || OpponentCurrentSanity < OpponentMaxSanity / 2;
+            var judgeResult = _pendingJudgeTask.Result;
+            _pendingJudgeTask = null;
+            ApplyJudgeResult(judgeResult);
+        }
 
-            string verdict = playerWon
-                ? $"CONFIRMED: {opponent.characterName} BROKEN!"
-                : "CONTRACT SIGNED: YOU LOSE!";
-            battleView.ShowDialogue("JUDGE", verdict, judgeResult.reasoning);
-            RecordDialogue("JUDGE", verdict, false);
+        private void ApplyJudgeResult(JudgeResult judgeResult)
+        {
+            _state.SetLastJudgeResult(judgeResult);
+            _state.UpdateConditions(judgeResult.playerEval, judgeResult.opponentEval);
 
-            OnBattleFinished(playerWon);
+            if (judgeResult.damage > 0)
+                _state.ApplyDamage(judgeResult.damage);
+
+            Debug.Log($"[Judge] damage={judgeResult.damage}, " +
+                $"sanity={_state.OpponentCurrentSanity}/{_state.OpponentMaxSanity}, " +
+                $"playerCondMet={_state.MetConditionCount(true)}/{_state.TotalConditionCount(true)}, " +
+                $"oppCondMet={_state.MetConditionCount(false)}/{_state.TotalConditionCount(false)}");
+
+            battleView.RefreshConditionPanel(_state);
+
+            if (_state.OpponentCurrentSanity <= 0)
+            {
+                OnBattleFinished(true);
+                return;
+            }
+            if (_state.AllConditionsMet(true))
+            {
+                OnBattleFinished(false);
+                return;
+            }
         }
     }
 }

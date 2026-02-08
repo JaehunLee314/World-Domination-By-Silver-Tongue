@@ -30,9 +30,8 @@ namespace SilverTongue.BattleScene
         [SerializeField] private TextMeshProUGUI thoughtText;
         [SerializeField] private Button dialogueAreaButton;
 
-        [Header("Sanity Bar")]
-        [SerializeField] private Image sanityBarFill;
-        [SerializeField] private TextMeshProUGUI sanityText;
+        [Header("Condition Panel")]
+        [SerializeField] private ConditionPanelView conditionPanelView;
 
         [Header("Visual Settings")]
         [SerializeField] private Color activeSpeakerColor = Color.white;
@@ -72,7 +71,6 @@ namespace SilverTongue.BattleScene
             SetupButtons();
             UpdateTurnTracker();
             UpdateAutoProgressUI();
-            UpdateSanityBar();
 
             SetSpeaker(false);
         }
@@ -84,7 +82,6 @@ namespace SilverTongue.BattleScene
             _waitingForInput = false;
             UpdateTurnTracker();
             UpdateAutoProgressUI();
-            UpdateSanityBar();
         }
 
         public void SetBattleActive(bool active)
@@ -110,33 +107,12 @@ namespace SilverTongue.BattleScene
             thoughtText.text = !string.IsNullOrEmpty(thought) ? thought : "";
         }
 
-        public void ShowJudgeDialogue(string text, JudgeResult result)
-        {
-            speakerNameText.text = "JUDGE";
-            dialogueText.text = text;
-            thoughtText.text = !string.IsNullOrEmpty(result.reasoning) ? result.reasoning : "";
-        }
-
         public void UpdateTurnTracker(string phaseLabel = null)
         {
             if (string.IsNullOrEmpty(phaseLabel))
                 turnTrackerText.text = $"Turn {_manager.CurrentTurn}/{_manager.MaxTurns}";
             else
                 turnTrackerText.text = $"Turn {_manager.CurrentTurn}/{_manager.MaxTurns} ({phaseLabel})";
-        }
-
-        public void UpdateSanityBar()
-        {
-            if (sanityBarFill != null)
-            {
-                float ratio = (float)_manager.OpponentCurrentSanity / _manager.OpponentMaxSanity;
-                sanityBarFill.fillAmount = ratio;
-                sanityBarFill.color = Color.Lerp(Color.red, Color.green, ratio);
-            }
-            if (sanityText != null)
-            {
-                sanityText.text = $"Sanity: {_manager.OpponentCurrentSanity}/{_manager.OpponentMaxSanity}";
-            }
         }
 
         public void SetSpeaker(bool isPlayer)
@@ -148,11 +124,18 @@ namespace SilverTongue.BattleScene
                 : _manager.Opponent.characterName;
         }
 
-        public void SetJudgeSpeaker()
+        // ─── Condition Panel ─────────────────────────────────────────────
+
+        public void InitializeConditionPanel(BattleState state)
         {
-            playerCharacterImage.color = inactiveSpeakerColor;
-            opponentCharacterImage.color = inactiveSpeakerColor;
-            speakerNameText.text = "JUDGE";
+            if (conditionPanelView != null)
+                conditionPanelView.Initialize(state.PlayerConditions, state.OpponentConditions);
+        }
+
+        public void RefreshConditionPanel(BattleState state)
+        {
+            if (conditionPanelView != null)
+                conditionPanelView.Refresh(state.PlayerConditions, state.OpponentConditions);
         }
 
         // ─── Async Helpers (called by manager) ──────────────────────────
@@ -179,6 +162,22 @@ namespace SilverTongue.BattleScene
                 await SmoothMovePanelAsync(playerPanel, _playerPanelOrigAnchorMin, _playerPanelOrigAnchorMax, panelMoveDuration);
             else if (!isPlayer && opponentPanel != null)
                 await SmoothMovePanelAsync(opponentPanel, _opponentPanelOrigAnchorMin, _opponentPanelOrigAnchorMax, panelMoveDuration);
+        }
+
+        public async System.Threading.Tasks.Task TransitionSpeakersAsync(bool fromPlayerToOpponent)
+        {
+            if (fromPlayerToOpponent)
+            {
+                var backTask = MovePanelBackAsync(true);
+                var forwardTask = MovePanelForwardAsync(false);
+                await System.Threading.Tasks.Task.WhenAll(backTask, forwardTask);
+            }
+            else
+            {
+                var backTask = MovePanelBackAsync(false);
+                var forwardTask = MovePanelForwardAsync(true);
+                await System.Threading.Tasks.Task.WhenAll(backTask, forwardTask);
+            }
         }
 
         // ─── Internal Setup ──────────────────────────────────────────────
