@@ -37,8 +37,8 @@ namespace SilverTongue.BattleScene
         private readonly BattleState _state = new BattleState();
 
         // Battle loop state
-        private BattlerAgent _playerAgent;
-        private BattlerAgent _opponentAgent;
+        private BattlerAgentHelper _playerAgent;
+        private BattlerAgentHelper _opponentAgent;
         private JudgeAgent _judgeAgent;
         private bool _isBattleActive;
         private bool _playerWon;
@@ -184,11 +184,11 @@ namespace SilverTongue.BattleScene
             _state.Reset(maxTurns, opponentMaxSanity, player.loseConditions, opp.loseConditions);
             _state.SetStrategy(strategy);
 
-            string playerPrompt = BattlerAgent.BuildPlayerPrompt(player, opp, _state.Strategy);
-            string opponentPrompt = BattlerAgent.BuildOpponentPrompt(player, opp);
+            string playerPrompt = BattlerAgentHelper.BuildPlayerPrompt(player, opp, _state.Strategy);
+            string opponentPrompt = BattlerAgentHelper.BuildOpponentPrompt(player, opp);
 
-            _playerAgent = new BattlerAgent(player, playerPrompt, BattlerAgent.GetThinkingEffort(player));
-            _opponentAgent = new BattlerAgent(opp, opponentPrompt, opp.thinkingEffort.ToString().ToLower());
+            _playerAgent = new BattlerAgentHelper(player, playerPrompt, BattlerAgentHelper.GetThinkingEffort(player));
+            _opponentAgent = new BattlerAgentHelper(opp, opponentPrompt, opp.thinkingEffort.ToString().ToLower());
             _judgeAgent = new JudgeAgent();
             _isBattleActive = true;
             _pendingJudgeTask = null;
@@ -203,7 +203,7 @@ namespace SilverTongue.BattleScene
         {
             _isBattleActive = true;
             _playerAgent.UpdateSystemPrompt(
-                BattlerAgent.BuildPlayerPrompt(SelectedBattler, opponent, _state.Strategy));
+                BattlerAgentHelper.BuildPlayerPrompt(SelectedBattler, opponent, _state.Strategy));
 
             battleView.Resume();
 
@@ -218,7 +218,7 @@ namespace SilverTongue.BattleScene
         /// </summary>
         private ParsedTags DisplayAndRecord(string speaker, string rawText, string thought, bool isPlayer)
         {
-            string cleanText = BattlerAgent.StripXmlTags(rawText, out var tags);
+            string cleanText = BattlerAgentHelper.StripXmlTags(rawText, out var tags);
 
             string displayThought = !string.IsNullOrEmpty(thought) ? thought : tags.InnerThought;
 
@@ -266,7 +266,7 @@ namespace SilverTongue.BattleScene
 
             if (opponentResponse.Success)
             {
-                string content = BattlerAgent.CleanDialogue(opponentResponse.Content);
+                string content = BattlerAgentHelper.CleanDialogue(opponentResponse.Content);
                 _opponentAgent.AddToHistory("model", content);
                 _playerAgent.AddToHistory("user", content);
                 var tags = DisplayAndRecord(opponent.characterName, content, opponentResponse.ThoughtSummary, false);
@@ -318,7 +318,7 @@ namespace SilverTongue.BattleScene
 
                 if (playerResponse.Success)
                 {
-                    string playerContent = BattlerAgent.CleanDialogue(playerResponse.Content);
+                    string playerContent = BattlerAgentHelper.CleanDialogue(playerResponse.Content);
                     _playerAgent.AddToHistory("model", playerContent);
                     _opponentAgent.AddToHistory("user", playerContent);
                     var playerTags = DisplayAndRecord(
@@ -352,7 +352,7 @@ namespace SilverTongue.BattleScene
 
                 if (opponentResponse.Success)
                 {
-                    string opponentContent = BattlerAgent.CleanDialogue(opponentResponse.Content);
+                    string opponentContent = BattlerAgentHelper.CleanDialogue(opponentResponse.Content);
                     _opponentAgent.AddToHistory("model", opponentContent);
                     _playerAgent.AddToHistory("user", opponentContent);
                     var opponentTags = DisplayAndRecord(

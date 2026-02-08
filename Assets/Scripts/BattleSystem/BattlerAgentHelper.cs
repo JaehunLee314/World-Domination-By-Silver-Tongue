@@ -7,14 +7,14 @@ using SilverTongue.LLM;
 
 namespace SilverTongue.BattleSystem
 {
-    public class BattlerAgent
+    public class BattlerAgentHelper
     {
         public CharacterSO Character { get; }
         public List<LLMMessage> History { get; } = new List<LLMMessage>();
         public string SystemPrompt { get; private set; }
         public string ThinkingEffort { get; }
 
-        public BattlerAgent(CharacterSO character, string systemPrompt, string thinkingEffort)
+        public BattlerAgentHelper(CharacterSO character, string systemPrompt, string thinkingEffort)
         {
             Character = character;
             SystemPrompt = systemPrompt;
