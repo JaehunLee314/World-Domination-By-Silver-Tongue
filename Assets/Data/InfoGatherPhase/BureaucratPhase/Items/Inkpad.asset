@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f7fb95f60f2d41acd4da1b903eac3, type: 3}
+  m_Name: Inkpad
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.ItemData
+  itemName: Dried-out Ink Pad
+  itemType: 2
+  icon: {fileID: 2800000, guid: 5437ecd4de3b22944b3d4d1b54035bc1, type: 3}
+  description: Proof that her tool of power is running out.
+  pickupDialogue: {fileID: 11400000, guid: 7c9eec20788e29b4eb6fd1ee9020218a, type: 2}

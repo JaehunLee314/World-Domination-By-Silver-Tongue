@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40fc9b5016aa1204392d41e373f95080, type: 3}
+  m_Name: FormPickup
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
+  lines:
+  - speakerName: Me
+    text: I grabbed a form from the "Take One" rack. Form 12-B. The holy scripture of this office.
+    emotion: 0
+  - speakerName: Me
+    text: Wait. Look at Section 4. "Void if submitted"? That makes no sense. It should be "Void if NOT submitted."
+    emotion: 0
+  - speakerName: Me
+    text: It’s a critical typo in their own official document. This logical paradox is the crack in her perfect armor.
+    emotion: 0
