@@ -14,35 +14,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
   lines:
   - speakerName: Hana
-    text: Is it just me, or did the air just get ten degrees colder? Everything is so... gray.
+    text: Is it just me, or did the air just get ten degrees colder? Everything is
+      so... gray.
     emotion: 5
   - speakerName: Me
-    text: This is the Administrative Zone. In Tokyo, if it isn't on a signed document, it doesn't exist. 
+    text: This is the Administrative Zone. In Tokyo, if it isn't on a signed document,
+      it doesn't exist.
     emotion: 0
   - speakerName: Conspiracy Theorist
-    text: The ultimate trap! They don't use 5G here... they use 'The Red Tape' to bind your very soul!
+    text: The ultimate trap! They don't use 5G here... they use 'The Red Tape' to
+      bind your very soul!
     emotion: 5
   - speakerName: Luna
-    text: Everyone looks like zombies. No one is looking at their phones... they're just staring at forms. It's disgusting.
+    text: Everyone looks like zombies. No one is looking at their phones... they're
+      just staring at forms. It's disgusting.
     emotion: 5
   - speakerName: Me
     text: Excuse me, we need a passage permit for the central district.
     emotion: 0
-  - speakerName: Satou
+  - speakerName: Sato
     text: Form 12-B. Blue ink only. Submit in triplicate. Next.
     emotion: 0
   - speakerName: Hana
     text: Wait! We don't have a Form 12-B! We just came from the park!
     emotion: 4
-  - speakerName: Satou
-    text: No form? Then you do not exist in the eyes of the State. Please vacate the premises or be filed as 'Unidentified Refuse'.
+  - speakerName: Sato
+    text: No form? Then you do not exist in the eyes of the State. Please vacate
+      the premises or be filed as 'Unidentified Refuse'.
     emotion: 2
   - speakerName: Luna
-    text: "'Refuse'...? You're calling us trash just because of a piece of paper?! "
+    text: '''Refuse''...? You''re calling us trash just because of a piece of paper?! '
     emotion: 2
   - speakerName: Me
-    text: Stay calm. This isn't about emotions or conspiracies. This is a war of bureaucracy. 
-    emotion: 0 
+    text: Stay calm. This isn't about emotions or conspiracies. This is a war of
+      bureaucracy.
+    emotion: 0
   - speakerName: Me
-    text: Everyone, look around. There must be a flaw in their regulations or an old memo we can use. We're not leaving without that stamp.
+    text: Everyone, look around. There must be a flaw in their regulations or an
+      old memo we can use. We're not leaving without that stamp.
     emotion: 0
