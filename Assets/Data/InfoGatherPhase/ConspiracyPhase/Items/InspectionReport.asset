@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f7fb95f60f2d41acd4da1b903eac3, type: 3}
+  m_Name: InspectionReport
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.ItemData
+  itemName: Failed Safety Report
+  itemType: 0
+  icon: {fileID: 2800000, guid: e841461af4a02e8478e9f0b0800ea106, type: 3}
+  description: A record of failed safety inspections due to budget cuts.
+  pickupDialogue: {fileID: 11400000, guid: 6ed98e6a4fc3f5e4dae6628869946999, type: 2}

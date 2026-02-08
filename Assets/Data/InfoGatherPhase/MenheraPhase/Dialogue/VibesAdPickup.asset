@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40fc9b5016aa1204392d41e373f95080, type: 3}
+  m_Name: VibesAdPickup
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
+  lines:
+  - speakerName: Me
+    text: '"Smile! Happiness is a Choice!" The model''s grin looks almost violent
+      in this artificial light. '
+    emotion: 0
+  - speakerName: Me
+    text: "For someone trapped in an emotional spiral, a sign telling them to \"just
+      be happy\" is the ultimate insult. \r\n"
+    emotion: 0

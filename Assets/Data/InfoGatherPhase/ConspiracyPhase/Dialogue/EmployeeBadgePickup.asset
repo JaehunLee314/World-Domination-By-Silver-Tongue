@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40fc9b5016aa1204392d41e373f95080, type: 3}
+  m_Name: EmployeeBadgePickup
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.DialogueEvent
+  lines:
+  - speakerName: Me
+    text: Finding a card on the floor. An official ID badge from the IT Corp. Someone
+      must have dropped it during the panic.
+    emotion: 4
+  - speakerName: Me
+    text: It has an RFID chip and the corporate logo. It looks authoritative... maybe
+      too authoritative.
+    emotion: 0
+  - speakerName: Me
+    text: If I brandish this, he might think I'm a corporate spy sent to "silence"
+      him. I need to be careful.
+    emotion: 2
