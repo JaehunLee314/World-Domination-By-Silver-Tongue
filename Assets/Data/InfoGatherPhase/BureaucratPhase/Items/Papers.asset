@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f7fb95f60f2d41acd4da1b903eac3, type: 3}
+  m_Name: Papers
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.ItemData
+  itemName: Tower of Pending Papers
+  itemType: 3
+  icon: {fileID: 2800000, guid: e5177845ea0442243957c595eb751c63, type: 3}
+  description: Evidence that the bureaucratic system is failing.
+  pickupDialogue: {fileID: 11400000, guid: 10fc913a3b9178c4f812b652faa3a29c, type: 2}

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf0f7fb95f60f2d41acd4da1b903eac3, type: 3}
+  m_Name: Napkin
+  m_EditorClassIdentifier: Assembly-CSharp::InfoGatherPhase.ItemData
+  itemName: Napkin Request
+  itemType: 2
+  icon: {fileID: 2800000, guid: c7b7574e8a5fe684e9110aa1ed8547bc, type: 3}
+  description: An unofficial, messy request written on a napkin.
+  pickupDialogue: {fileID: 11400000, guid: 3609b3115f61a2e4a99bc6e856e0011c, type: 2}
